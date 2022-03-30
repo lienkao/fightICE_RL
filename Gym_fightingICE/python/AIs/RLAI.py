@@ -35,7 +35,7 @@ class RLAI(object):
         self.commandCenter = self.gateway.jvm.aiinterface.CommandCenter()
         self.player = player
         self.gameData = gameData
-        self.charaname = str(gameData.getCharacterName(self.player))
+        self.characterName = str(gameData.getCharacterName(self.player))
         self.motionData = self.gameData.getMotionData(self.player)
         self.myCharacter = self.frameData.getCharacter(self.player)
         self.oppCharacter = self.frameData.getCharacter(not self.player)
@@ -53,15 +53,15 @@ class RLAI(object):
         self.nowActionIndex = -1
         self.preActionIndex = -1
 
-        # previos State's myHp and oppHp use to count reward
+        # previous State's myHp and oppHp use to count reward
         self.preMyHp = -1
         self.preOppHp = -1
 
         # print("in init")
 
-        # if self.charaname == "ZEN":
+        # if self.characterName == "ZEN":
         try:
-            fid = open(os.path.join((self.qtables_folder, 'ZEN.pkl')), "rb")
+            fid = open(os.path.join((self.QTablesFolder, 'ZEN.pkl')), "rb")
             self.QTables = pickle.load(fid)
             fid.close()
         except:
@@ -117,7 +117,7 @@ class RLAI(object):
     
     def gameEnd(self):
         # store Q table back
-        fid = open(os.path.join((self.qtables_folder, 'ZEN.pkl')), "wb")
+        fid = open(os.path.join((self.QTablesFolder, 'ZEN.pkl')), "wb+")
         pickle.dump( self.QTables, fid)
         fid.close()
         return 0
@@ -174,24 +174,24 @@ class RLAI(object):
         print("XState, YState in getState()", XState, YState)     
         return XState, YState
     
-    '''return avalible actions list by player's now energy
+    '''return avaliable actions list by player's now energy
     '''
-    def getAvalibleActions(self):
-        # print("getAvalibleActions")
-        avalibleActions = []
+    def getAvaliableActions(self):
+        # print("getAvaliableActions")
+        avaliableActions = []
         for action in self.actions:
             if self.getActionEnergyCost(action) <= self.energy:
-                avalibleActions.append(action)
-        return avalibleActions
+                avaliableActions.append(action)
+        return avaliableActions
     
-    def getBestActionInQTable(self, avalibleActions):
+    def getBestActionInQTable(self, avaliableActions):
         print("getBestActionInQTable")
-        # print("avalible actions: ", avalibleActions)
+        # print("avaliable actions: ", avaliableActions)
         maxIndex = 0
         print("X state: ", self.nowXState, " Y state: ", self.nowYState)
         maxValue = self.QTables[self.nowXState][self.nowYState][0]
         print("maxvalue: ", maxValue)
-        for act in avalibleActions:
+        for act in avaliableActions:
             nowIndex = self.actions.index(act)
             if self.QTables[self.nowXState][self.nowYState][nowIndex] > maxValue:
                 maxValue = self.QTables[self.nowXState][self.nowYState][nowIndex]
@@ -206,8 +206,8 @@ class RLAI(object):
         self.preMyHp = self.myCharacter.getHp()
         self.preOppHp = self.oppCharacter.getHp()
         
-        avalibleActions = self.getAvalibleActions()
-        # print("complete getAcalibleActions")
+        avaliableActions = self.getAvaliableActions()
+        # print("complete getAvaliableActions")
         action = self.gateway.jvm.enumerate.Action.STAND_B
         # print("start random")
         # action by state
@@ -215,11 +215,11 @@ class RLAI(object):
             print("not random one")
             self.nowXState, self.nowYState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY())
             self.preXState, self.preYState = self.nowXState, self.nowYState
-            action = self.getBestActionInQTable(avalibleActions)
+            action = self.getBestActionInQTable(avaliableActions)
         # action by random
         else:
             print("random one")
-            action = np.random.choice(avalibleActions)
+            action = np.random.choice(avaliableActions)
         # print("get action")
         return action
     
