@@ -74,6 +74,15 @@ class RLAI(object):
             print("Lost, p1hp:{}, p2hp:{}, frame used: {}".format(p1hp,  p2hp, frames))
         elif p1hp > p2hp:
             print("Win!, p1hp:{}, p2hp:{}, frame used: {}".format(p1hp,  p2hp, frames))
+        self.nowXState = -1
+        self.nowYState = -1
+        self.preXState = -1
+        self.preYState = -1
+        self.nowActionIndex = -1
+        self.preActionIndex = -1
+        self.preMyHp = -1
+        self.preOppHp = -1
+        return
 
     # Please define this method when you use FightingICE version 4.00 or later
     def getScreenData(self, sd):
@@ -93,8 +102,6 @@ class RLAI(object):
     
     def input(self):
         return self.inputKey
-    
-    
     
     def getActionEnergyCost(self, action):
         return abs(self.myMotion.get(self.gateway.jvm.enumerate.Action.valueOf(action.name()).ordinal()).getAttackStartAddEnergy())
@@ -122,13 +129,17 @@ class RLAI(object):
     ''' update Q table by last time's state and action
     '''
     def updateQTable(self):
-        reward = (self.oppCharactor.getHP() - self.preOppHp) - (self.myCharactor.getHP() - self.preMyHp)
+        reward = abs(self.oppCharactor.getHP() - self.preOppHp) - abs(self.myCharactor.getHP() - self.preMyHp)
         maxFuture = self.maxFutureState()
         x = self.preXState
         y = self.preYState
         act = self.preActionIndex
         # Q(S, A) += LR * (Reward + FR(max(Q(S+1, A))) - Q(S, A))
-        self.QTables[x][y][act] += self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][act])
+        updateValue = self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][act])
+
+        print("last action reward: ", reward, " maxFuture: ", maxFuture, " update value: ", updateValue)
+
+        self.QTables[x][y][act] += updateValue
         return
 
     def getCorrespondingValue(self, rangelist, find):
@@ -157,20 +168,30 @@ class RLAI(object):
                 avalibleActions.append(action)
         return avalibleActions
     
-    def getBestActionInQTable(self):
-        return self.actions[self.QTables[self.nowXState][self.nowYState].argmax()]
+    def getBestActionInQTable(self, avalibleActions):
+        maxIndex = -1
+        maxValue = -9999
+        for act in avalibleActions:
+            nowIndex = self.actions.index(act)
+            if self.QTables[self.nowXState][self.nowYState][nowIndex] > maxValue:
+                maxValue = self.QTables[self.nowXState][self.nowYState][nowIndex]
+                maxIndex = nowIndex
+        
+        return self.actions[maxIndex]
     
     ''' get Action 80% by State 20% random
     '''
     def getAction(self):
+        self.preMyHp = self.myCharactor.getHP()
+        self.preOppHp = self.oppCharacter.getHP()
+
         avalibleActions = self.getAvalibleActions()
         action = self.gateway.jvm.enumerate.Action.STAND_B
         # action by state
         if np.random.random_sample() <= self.epsilon:
             self.nowXState, self.nowYState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY())
-            action = self.getBestActionInQTable()
-            self.preXState = self.nowXState
-            self.preYState = self.nowYState
+            self.preXState, self.preYState = self.nowXState, self.nowYState
+            action = self.getBestActionInQTable(avalibleActions)
         # action by random
         else:
             action = np.random.choice(avalibleActions)
