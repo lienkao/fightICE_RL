@@ -19,7 +19,7 @@ class RLAI(object):
         self.QTablesFolder = QTablesFolder
         
         # greedy parameter
-        self.epsilon = 0.8
+        self.epsilon = 0.1
         # learning rate
         self.learningRate = 0.2
         # future rate
@@ -220,7 +220,7 @@ class RLAI(object):
         else:
             print("random one")
             action = np.random.choice(avaliableActions)
-        # print("get action")
+        print("get action ", action)
         return action
     
     def processing(self):
