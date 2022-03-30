@@ -2,9 +2,27 @@ from py4j.java_gateway import get_field
 import pickle
 import os
 import numpy as np
+from random import choice 
+
+class QTableManager(object):
+    def __init__(self, folderPath, pklName, method):
+        self.folderPath = folderPath
+        self.pklName = pklName
+        self.pickleFile = open(os.path.join(self.folderPath, self.pklName), method)
+    
+    def getTable(self):
+        self.QTable = pickle.load(self.pickleFile)
+        # print("get QTable: ", self.QTable)
+        self.pickleFile.close()
+        return self.QTable
+
+    def writeTable(self, QTable):
+        self.QTable = QTable
+        pickle.dump(self.QTable, self.pickleFile)
+        self.pickleFile.close()
+        return
 
 class RLAI(object):
-
     def __init__(self, gateway, QTablesFolder):
         # print("__init__")
         self.gateway = gateway
@@ -19,7 +37,7 @@ class RLAI(object):
         self.QTablesFolder = QTablesFolder
         
         # greedy parameter
-        self.epsilon = 0.1
+        self.epsilon = 0.8
         # learning rate
         self.learningRate = 0.2
         # future rate
@@ -57,18 +75,22 @@ class RLAI(object):
         self.preMyHp = -1
         self.preOppHp = -1
 
+        self.roundCount = 0
+        
         # print("in init")
 
         # if self.characterName == "ZEN":
-        try:
-            fid = open(os.path.join((self.QTablesFolder, 'ZEN.pkl')), "rb")
-            self.QTables = pickle.load(fid)
-            fid.close()
-        except:
-            n_bucket = (5, 9)
-            n_actions = len(self.actions)
-            self.QTables = np.zeros(n_bucket + (n_actions,))
-        
+        # try:
+        self.QTManager = QTableManager(self.QTablesFolder, 'ZEN.pkl', "rb")
+        self.QTables = self.QTManager.getTable()
+        # except:
+        #     n_bucket = (5, 9)
+        #     n_actions = len(self.actions)
+        #     self.QTables = np.zeros(n_bucket + (n_actions,))
+            # print(self.QTablesFolder)
+            # print(os.path.join(self.QTablesFolder, 'ZEN.pkl'))
+            # self.pickleFile = open(os.path.join(self.QTablesFolder, 'ZEN.pkl'), "wb+")
+            # pickle.dump( self.QTables, self.pickleFile)
         # print("finish try")
         
         self.isGameJustStarted = True
@@ -90,6 +112,11 @@ class RLAI(object):
         self.preActionIndex = -1
         self.preMyHp = -1
         self.preOppHp = -1
+        self.roundCount += 1
+        if self.roundCount >= 3:
+            print("Game End!")
+            self.QTManager = QTableManager(self.QTablesFolder, 'ZEN.pkl', "wb+")
+            self.QTManager.writeTable(self.QTables)
         return
 
     # Please define this method when you use FightingICE version 4.00 or later
@@ -115,12 +142,6 @@ class RLAI(object):
         # print("complete get energy cost")
         return ret
     
-    def gameEnd(self):
-        # store Q table back
-        fid = open(os.path.join((self.QTablesFolder, 'ZEN.pkl')), "wb+")
-        pickle.dump( self.QTables, fid)
-        fid.close()
-        return 0
 
     # return max Q(S+1, A)
     def maxFutureState(self):
@@ -148,7 +169,7 @@ class RLAI(object):
         # Q(S, A) += LR * (Reward + FR(max(Q(S+1, A))) - Q(S, A))
         updateValue = self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][act])
 
-        print("last action reward: ", reward, " maxFuture: ", maxFuture, " update value: ", updateValue)
+        # print("last action reward: ", reward, " maxFuture: ", maxFuture, " update value: ", updateValue)
 
         self.QTables[x][y][act] += updateValue
         return
@@ -168,10 +189,10 @@ class RLAI(object):
     '''
     def getState(self, disX, disY):
         # print("getState")
-        print("disX, disY in getState()", disX, disY)
+        # print("disX, disY in getState()", disX, disY)
         XState = self.getCorrespondingValue([20, 50, 85, 100], disX)
         YState = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], disY)   
-        print("XState, YState in getState()", XState, YState)     
+        # print("XState, YState in getState()", XState, YState)     
         return XState, YState
     
     '''return avaliable actions list by player's now energy
@@ -185,12 +206,12 @@ class RLAI(object):
         return avaliableActions
     
     def getBestActionInQTable(self, avaliableActions):
-        print("getBestActionInQTable")
+        # print("getBestActionInQTable")
         # print("avaliable actions: ", avaliableActions)
         maxIndex = 0
-        print("X state: ", self.nowXState, " Y state: ", self.nowYState)
+        # print("X state: ", self.nowXState, " Y state: ", self.nowYState)
         maxValue = self.QTables[self.nowXState][self.nowYState][0]
-        print("maxvalue: ", maxValue)
+        # print("maxvalue: ", maxValue)
         for act in avaliableActions:
             nowIndex = self.actions.index(act)
             if self.QTables[self.nowXState][self.nowYState][nowIndex] > maxValue:
@@ -202,29 +223,32 @@ class RLAI(object):
     ''' get Action 80% by State 20% random
     '''
     def getAction(self):
-        print("getAction")
+        # print("getAction")
         self.preMyHp = self.myCharacter.getHp()
         self.preOppHp = self.oppCharacter.getHp()
         
         avaliableActions = self.getAvaliableActions()
-        # print("complete getAvaliableActions")
+
+        # print("complete getAvaliableActions, avaliableActions: ", avaliableActions)
         action = self.gateway.jvm.enumerate.Action.STAND_B
+        # print(action)
         # print("start random")
         # action by state
         if np.random.random_sample() <= self.epsilon:
-            print("not random one")
+            # print("not random one")
             self.nowXState, self.nowYState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY())
             self.preXState, self.preYState = self.nowXState, self.nowYState
             action = self.getBestActionInQTable(avaliableActions)
         # action by random
         else:
-            print("random one")
-            action = np.random.choice(avaliableActions)
-        print("get action ", action)
+            # print("random one")
+            action = choice(avaliableActions)
+            # print("random choice done")
+        # print("get action ", action)
         return action
     
     def processing(self):
-        print("processing")
+        # print("processing")
         # First we check whether we are at the end of the round
         if self.frameData.getEmptyFlag() or self.frameData.getRemainingTime() <= 0:
             self.isGameJustStarted = True

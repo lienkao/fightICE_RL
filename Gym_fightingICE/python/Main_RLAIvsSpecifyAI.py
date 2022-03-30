@@ -19,7 +19,7 @@ def check_args(args):
 
 
 def start_game():
-        p1 = AIs.RLAI(gateway, "/AIs/Qtables")
+        p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables")
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)
@@ -50,7 +50,7 @@ def main_process():
 args = sys.argv
 argc = len(args)
 GAME_NUM = 1
-OPPO_AI = "ForwardAI"
+OPPO_AI = "Machete"
 gateway = JavaGateway(gateway_parameters=GatewayParameters(port=4242), callback_server_parameters=CallbackServerParameters())
 manager = gateway.entry_point
 
