@@ -6,6 +6,7 @@ import numpy as np
 class RLAI(object):
 
     def __init__(self, gateway, QTablesFolder):
+        # print("__init__")
         self.gateway = gateway
         o = self.gateway.jvm.enumerate.Action
         # actions:         Kick    Crouch Kick  Crouch Strong Kick    Slide Kick       
@@ -28,15 +29,16 @@ class RLAI(object):
         pass
     
     def initialize(self, gameData, player):
+        # print("initialize")
         self.inputKey = self.gateway.jvm.struct.Key()
         self.frameData = self.gateway.jvm.struct.FrameData()
-        self.cc = self.gateway.jvm.aiinterface.CommandCenter()
+        self.commandCenter = self.gateway.jvm.aiinterface.CommandCenter()
         self.player = player
         self.gameData = gameData
         self.charaname = str(gameData.getCharacterName(self.player))
         self.motionData = self.gameData.getMotionData(self.player)
-        self.myCharactor = self.frameData.getCharacter(self.player)
-        self.oppCharactor = self.frameData.getCharacter(not self.player)
+        self.myCharacter = self.frameData.getCharacter(self.player)
+        self.oppCharacter = self.frameData.getCharacter(not self.player)
         self.simulator = self.gameData.getSimulator()
 
         # now State's X and Y index in Q table
@@ -55,6 +57,8 @@ class RLAI(object):
         self.preMyHp = -1
         self.preOppHp = -1
 
+        # print("in init")
+
         # if self.charaname == "ZEN":
         try:
             fid = open(os.path.join((self.qtables_folder, 'ZEN.pkl')), "rb")
@@ -65,15 +69,19 @@ class RLAI(object):
             n_actions = len(self.actions)
             self.QTables = np.zeros(n_bucket + (n_actions,))
         
+        # print("finish try")
+        
         self.isGameJustStarted = True
         return 0
 
     # please define this method when you use FightingICE version 3.20 or later
     def roundEnd(self, p1hp, p2hp, frames):
+
         if p1hp <= p2hp:
-            print("Lost, p1hp:{}, p2hp:{}, frame used: {}".format(p1hp,  p2hp, frames))
+            print("Lose")
         elif p1hp > p2hp:
-            print("Win!, p1hp:{}, p2hp:{}, frame used: {}".format(p1hp,  p2hp, frames))
+            print("Win!")
+        print("p1hp:{}, p2hp:{}, frame used: {}".format(p1hp,  p2hp, frames))
         self.nowXState = -1
         self.nowYState = -1
         self.preXState = -1
@@ -90,21 +98,22 @@ class RLAI(object):
     
     # update every frame
     def getInformation(self, frameData, isControl):
+        # print("getInformation")
         self.frameData = frameData
+        self.commandCenter.setFrameData(self.frameData, self.player)
         self.isControl = isControl
-        self.myCharacter = frameData.getCharacter(self.player)
-        self.oppCharacter = frameData.getCharacter(not self.player)
-        self.energy = self.myCharacter.getEnergy()
-        self.cc.setFrameData(self.frameData, self.player)
-
-        if frameData.getEmptyFlag():
-            return
+        self.myCharacter = self.frameData.getCharacter(self.player)
+        self.oppCharacter = self.frameData.getCharacter(not self.player)
+        # print("finish getInformation")
     
     def input(self):
         return self.inputKey
     
     def getActionEnergyCost(self, action):
-        return abs(self.myMotion.get(self.gateway.jvm.enumerate.Action.valueOf(action.name()).ordinal()).getAttackStartAddEnergy())
+        # print("get Action energy cost")
+        ret = abs(self.motionData.get(self.gateway.jvm.enumerate.Action.valueOf(action.name()).ordinal()).getAttackStartAddEnergy())
+        # print("complete get energy cost")
+        return ret
     
     def gameEnd(self):
         # store Q table back
@@ -115,6 +124,7 @@ class RLAI(object):
 
     # return max Q(S+1, A)
     def maxFutureState(self):
+        # print("maxFutureState")
         mAction = self.gateway.jvm.java.util.ArrayDeque()
         mAction.add(self.actions[self.preActionIndex])
 
@@ -129,7 +139,8 @@ class RLAI(object):
     ''' update Q table by last time's state and action
     '''
     def updateQTable(self):
-        reward = abs(self.oppCharactor.getHP() - self.preOppHp) - abs(self.myCharactor.getHP() - self.preMyHp)
+        # print("updateQTable")
+        reward = abs(self.oppCharacter.getHp() - self.preOppHp) - abs(self.myCharacter.getHp() - self.preMyHp)
         maxFuture = self.maxFutureState()
         x = self.preXState
         y = self.preYState
@@ -143,9 +154,10 @@ class RLAI(object):
         return
 
     def getCorrespondingValue(self, rangelist, find):
+        # print("getCorrespondingValue")
         if find < rangelist[0]:
             return 0
-        if find > rangelist[-1]:
+        if find >= rangelist[-1]:
             return len(rangelist)
         for i in range(1, len(rangelist)):
             if rangelist[i-1] <= find < rangelist[i]:
@@ -155,13 +167,17 @@ class RLAI(object):
                                 y: < -200 -200~-100 -100~-40 -40~0 0 0~40 40~100 100~200 200<
     '''
     def getState(self, disX, disY):
+        # print("getState")
+        print("disX, disY in getState()", disX, disY)
         XState = self.getCorrespondingValue([20, 50, 85, 100], disX)
-        YState = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], disY)        
+        YState = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], disY)   
+        print("XState, YState in getState()", XState, YState)     
         return XState, YState
     
     '''return avalible actions list by player's now energy
     '''
     def getAvalibleActions(self):
+        # print("getAvalibleActions")
         avalibleActions = []
         for action in self.actions:
             if self.getActionEnergyCost(action) <= self.energy:
@@ -169,8 +185,12 @@ class RLAI(object):
         return avalibleActions
     
     def getBestActionInQTable(self, avalibleActions):
-        maxIndex = -1
-        maxValue = -9999
+        print("getBestActionInQTable")
+        # print("avalible actions: ", avalibleActions)
+        maxIndex = 0
+        print("X state: ", self.nowXState, " Y state: ", self.nowYState)
+        maxValue = self.QTables[self.nowXState][self.nowYState][0]
+        print("maxvalue: ", maxValue)
         for act in avalibleActions:
             nowIndex = self.actions.index(act)
             if self.QTables[self.nowXState][self.nowYState][nowIndex] > maxValue:
@@ -182,36 +202,52 @@ class RLAI(object):
     ''' get Action 80% by State 20% random
     '''
     def getAction(self):
-        self.preMyHp = self.myCharactor.getHP()
-        self.preOppHp = self.oppCharacter.getHP()
-
+        print("getAction")
+        self.preMyHp = self.myCharacter.getHp()
+        self.preOppHp = self.oppCharacter.getHp()
+        
         avalibleActions = self.getAvalibleActions()
+        # print("complete getAcalibleActions")
         action = self.gateway.jvm.enumerate.Action.STAND_B
+        # print("start random")
         # action by state
         if np.random.random_sample() <= self.epsilon:
+            print("not random one")
             self.nowXState, self.nowYState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY())
             self.preXState, self.preYState = self.nowXState, self.nowYState
             action = self.getBestActionInQTable(avalibleActions)
         # action by random
         else:
+            print("random one")
             action = np.random.choice(avalibleActions)
+        # print("get action")
         return action
     
     def processing(self):
+        print("processing")
+        # First we check whether we are at the end of the round
         if self.frameData.getEmptyFlag() or self.frameData.getRemainingTime() <= 0:
             self.isGameJustStarted = True
             return
         
-        if self.frameskip:
-            if self.cc.getSkillFlag():
-                self.inputKey = self.cc.getSkillKey()
-                return
-            if not self.isControl:
-                return
+        if not self.isGameJustStarted:
+            # Simulate the delay and look ahead 2 frames. The simulator class exists already in FightingICE
+            self.frameData = self.simulator.simulate(self.frameData, self.player, None, None, 17)
+        else:
+            # If the game just started, no point on simulating
+            self.isGameJustStarted = False
 
-            self.inputKey.empty()
-            self.cc.skillCancel()
-        
+        self.commandCenter.setFrameData(self.frameData, self.player)    
+
+        if self.commandCenter.getSkillFlag():
+            self.inputKey = self.commandCenter.getSkillKey()
+            return
+
+        self.inputKey.empty()
+        self.commandCenter.skillCancel()
+
+        self.energy = self.myCharacter.getEnergy()
+        # print("my energy: ", self.energy)
         # previous action is done, update Q table
         if self.preActionIndex != -1:
             self.updateQTable()
@@ -220,9 +256,7 @@ class RLAI(object):
         action = self.getAction()
         self.preActionIndex = self.actions.index(action)
 
-        self.cc.commandCall(action.name())
-        if not self.frameskip:
-            self.inputKey = self.cc.getSkillKey()
+        self.commandCenter.commandCall(action.name())
 
 
     

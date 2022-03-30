@@ -4,7 +4,7 @@ import math
 from py4j.java_gateway import JavaGateway, GatewayParameters, CallbackServerParameters, get_field
 
 from DisplayInfo import DisplayInfo
-from Gym_fightingICE.python.AIs.Node import Node
+from AIs.Node import Node
 import AIs
 
 def check_args(args):

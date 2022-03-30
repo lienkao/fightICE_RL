@@ -26,7 +26,7 @@ def check_args(args):
 
 
 def start_game():
-        p1 = AIs.MctsAi(gateway, UCT_TREE_DEPTH, 'self.setOppAction_' + PREDICT_OPPO + '()')
+        p1 = AIs.RLAI(gateway, "/AIs/Qtables")
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)
