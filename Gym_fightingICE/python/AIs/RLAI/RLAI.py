@@ -66,12 +66,12 @@ class RLAI(object):
         # learning rate
         self.learningRate = 0.2
         # future rate
-        self.futureRate = 0.2
+        self.futureRate = 1.0
 
-        self.XStates = [20, 50, 85, 100]
-        self.YStates = [-200, -100, -40, 0, 1, 40, 100, 200]
-        self.boundXStates = [10, 100, 250, 850, 950]
-        
+        self.XStates = [50, 85, 100, 150, 200, 300]
+        self.YStates = [-70, 0, 40, 120, 200]
+        self.boundXStates = [50, 150, 475, 800, 900]
+
     def close(self):
         pass
     
