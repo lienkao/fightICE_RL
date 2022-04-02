@@ -17,6 +17,7 @@ class Logging(object):
 logger = Logging(0)
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
+        self.folderPath = folderPath
         self.pickleFileName = os.path.join(folderPath, pklName)
         self.n_bucket = n_bucket
         self.n_actions = n_actions
@@ -40,11 +41,24 @@ class QTableManager(object):
         
         return QTable
 
-    def writeTable(self, QTable):
-        pickleFile = open(self.pickleFileName, 'wb+')
+    def writeTable(self, QTable, file = None):
+        logger.logging("in write table", 0)
+        if file == None:
+            pickleFile = open(self.pickleFileName, 'wb+')
+        else:
+            pickleFile = open(file, 'wb+')
         pickle.dump(QTable, pickleFile)
         pickleFile.close()
         return
+   
+    def recordQTableEachGame(self):
+        pickleFile = open(os.path.join(self.folderPath, 'ZEN_v2.0_record.pkl'), 'ab+')
+        QTable = self.getTable()
+        pickle.dump(QTable, pickleFile)
+        pickleFile.close()
+        return
+
+        
 
 class RLAI(object):
     def __init__(self, gateway, QTablesFolder):
@@ -143,6 +157,7 @@ class RLAI(object):
         if self.roundCount >= 3:
             print("Game End!")
             self.QTManager.writeTable(self.QTables)
+            self.QTManager.recordQTableEachGame()
             logger.logging("Finish store Qtable~", 1)
         return
 
