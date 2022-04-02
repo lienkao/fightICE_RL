@@ -35,7 +35,7 @@ class RLAI(object):
                          o.AIR_DB,    o.AIR_D_DF_FB,     o.AIR_UB,    o.AIR_F_D_DFB]
         self.frameskip = True
         self.QTablesFolder = QTablesFolder
-        
+        self.pklFile = 'ZEN.pkl'
         # greedy parameter
         self.epsilon = 0.8
         # learning rate
@@ -81,15 +81,15 @@ class RLAI(object):
 
         # if self.characterName == "ZEN":
         # try:
-        self.QTManager = QTableManager(self.QTablesFolder, 'ZEN.pkl', "rb")
+        self.QTManager = QTableManager(self.QTablesFolder, self.pklFile, "rb")
         self.QTables = self.QTManager.getTable()
         # except:
         #     n_bucket = (5, 9)
         #     n_actions = len(self.actions)
         #     self.QTables = np.zeros(n_bucket + (n_actions,))
             # print(self.QTablesFolder)
-            # print(os.path.join(self.QTablesFolder, 'ZEN.pkl'))
-            # self.pickleFile = open(os.path.join(self.QTablesFolder, 'ZEN.pkl'), "wb+")
+            # print(os.path.join(self.QTablesFolder, self.pklFile))
+            # self.pickleFile = open(os.path.join(self.QTablesFolder, self.pklFile), "wb+")
             # pickle.dump( self.QTables, self.pickleFile)
         # print("finish try")
         
@@ -115,7 +115,7 @@ class RLAI(object):
         self.roundCount += 1
         if self.roundCount >= 3:
             print("Game End!")
-            self.QTManager = QTableManager(self.QTablesFolder, 'ZEN.pkl', "wb+")
+            self.QTManager = QTableManager(self.QTablesFolder, self.pklFile, "wb+")
             self.QTManager.writeTable(self.QTables)
         return
 
