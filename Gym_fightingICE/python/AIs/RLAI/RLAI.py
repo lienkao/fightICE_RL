@@ -1,30 +1,55 @@
+from asyncio.log import logger
 from py4j.java_gateway import get_field
 import pickle
 import os
 import numpy as np
 from random import choice 
+ 
+class Logging(object):
+    def __init__(self, mode):
+        self.mode = mode
+    '''0: debug, 1:info, 2: error
+    '''
+    def logging(self, msg, level):
+        if level >= self.mode:
+            print(msg)
 
+logger = Logging(0)
 class QTableManager(object):
-    def __init__(self, folderPath, pklName, method):
-        self.folderPath = folderPath
-        self.pklName = pklName
-        self.pickleFile = open(os.path.join(self.folderPath, self.pklName), method)
+    def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
+        self.pickleFileName = os.path.join(folderPath, pklName)
+        self.n_bucket = n_bucket
+        self.n_actions = n_actions
     
+    def createTable(self):
+        logger.logging("createTable()", 0)
+        QTable = np.zeros(self.n_bucket + (self.n_actions,))
+        self.writeTable(QTable)
+        logger.logging("created QTable", 0)
+        return QTable
+
     def getTable(self):
-        self.QTable = pickle.load(self.pickleFile)
-        # print("get QTable: ", self.QTable)
-        self.pickleFile.close()
-        return self.QTable
+        try:
+            pickleFile = open(self.pickleFileName, 'rb')
+            QTable = pickle.load(pickleFile)
+            pickleFile.close()
+        except:
+            QTable = self.createTable()
+
+        logger.logging("get QTable: ", 0)
+        
+        return QTable
 
     def writeTable(self, QTable):
-        self.QTable = QTable
-        pickle.dump(self.QTable, self.pickleFile)
-        self.pickleFile.close()
+        pickleFile = open(self.pickleFileName, 'wb+')
+        pickle.dump(QTable, pickleFile)
+        pickleFile.close()
         return
 
 class RLAI(object):
     def __init__(self, gateway, QTablesFolder):
-        # print("__init__")
+        
+        
         self.gateway = gateway
         o = self.gateway.jvm.enumerate.Action
         # actions:         Kick    Crouch Kick  Crouch Strong Kick    Slide Kick       
@@ -43,11 +68,15 @@ class RLAI(object):
         # future rate
         self.futureRate = 0.2
 
+        self.XStates = [20, 50, 85, 100]
+        self.YStates = [-200, -100, -40, 0, 1, 40, 100, 200]
+        self.boundXStates = [10, 100, 250, 850, 950]
+        
     def close(self):
         pass
     
     def initialize(self, gameData, player):
-        # print("initialize")
+        logger.logging("initialize", 0)
         self.inputKey = self.gateway.jvm.struct.Key()
         self.frameData = self.gateway.jvm.struct.FrameData()
         self.commandCenter = self.gateway.jvm.aiinterface.CommandCenter()
@@ -62,10 +91,12 @@ class RLAI(object):
         # now State's X and Y index in Q table
         self.nowXState = -1
         self.nowYState = -1
+        self.nowBoundXState = -1
 
         # previous State's X and Y index in Q table
         self.preXState = -1
         self.preYState = -1
+        self.preBoundXState = -1
 
         # now and previous action's index in actions[]
         self.nowActionIndex = -1
@@ -77,21 +108,15 @@ class RLAI(object):
 
         self.roundCount = 0
         
-        # print("in init")
 
         # if self.characterName == "ZEN":
-        # try:
-        self.QTManager = QTableManager(self.QTablesFolder, self.pklFile, "rb")
+        logger.logging("start init QTManager", 0)
+        self.QTManager = QTableManager(self.QTablesFolder, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1), len(self.actions))
+        logger.logging("created QTManager", 0)
         self.QTables = self.QTManager.getTable()
-        # except:
-        #     n_bucket = (5, 9)
-        #     n_actions = len(self.actions)
-        #     self.QTables = np.zeros(n_bucket + (n_actions,))
-            # print(self.QTablesFolder)
-            # print(os.path.join(self.QTablesFolder, self.pklFile))
-            # self.pickleFile = open(os.path.join(self.QTablesFolder, self.pklFile), "wb+")
-            # pickle.dump( self.QTables, self.pickleFile)
-        # print("finish try")
+        logger.logging("get QTables", 0)    
+
+        logger.logging("finish try", 0)
         
         self.isGameJustStarted = True
         return 0
@@ -106,8 +131,10 @@ class RLAI(object):
         print("p1hp:{}, p2hp:{}, frame used: {}".format(p1hp,  p2hp, frames))
         self.nowXState = -1
         self.nowYState = -1
+        self.nowBoundXState = -1
         self.preXState = -1
         self.preYState = -1
+        self.preBoundXState = -1
         self.nowActionIndex = -1
         self.preActionIndex = -1
         self.preMyHp = -1
@@ -115,8 +142,8 @@ class RLAI(object):
         self.roundCount += 1
         if self.roundCount >= 3:
             print("Game End!")
-            self.QTManager = QTableManager(self.QTablesFolder, self.pklFile, "wb+")
             self.QTManager.writeTable(self.QTables)
+            logger.logging("Finish store Qtable~", 1)
         return
 
     # Please define this method when you use FightingICE version 4.00 or later
@@ -125,21 +152,21 @@ class RLAI(object):
     
     # update every frame
     def getInformation(self, frameData, isControl):
-        # print("getInformation")
+        logger.logging("getInformation", 0)
         self.frameData = frameData
         self.commandCenter.setFrameData(self.frameData, self.player)
         self.isControl = isControl
         self.myCharacter = self.frameData.getCharacter(self.player)
         self.oppCharacter = self.frameData.getCharacter(not self.player)
-        # print("finish getInformation")
+        logger.logging("finish getInformation", 0)
     
     def input(self):
         return self.inputKey
     
     def getActionEnergyCost(self, action):
-        # print("get Action energy cost")
+        logger.logging("get Action energy cost", 0)
         ret = abs(self.motionData.get(self.gateway.jvm.enumerate.Action.valueOf(action.name()).ordinal()).getAttackStartAddEnergy())
-        # print("complete get energy cost")
+        logger.logging("complete get energy cost", 0)
         return ret
     
 
@@ -153,29 +180,35 @@ class RLAI(object):
 
         disX = abs(futureFrame.getDistanceX())
         disY = futureFrame.getDistanceY()
-        futureX, futureY = self.getState(disX, disY)
+        absoluteX = self.myCharacter.getCenterX()
+        isFacingRight = self.myCharacter.isFront()
+        faceBoundX = absoluteX
+        if isFacingRight:
+            faceBoundX = 960 - absoluteX
+        futureX, futureY, futureBoundX = self.getState(disX, disY, faceBoundX)
         
-        return self.QTables[futureX][futureY].max()
+        return self.QTables[futureX][futureY][futureBoundX].max()
     
     ''' update Q table by last time's state and action
     '''
     def updateQTable(self):
-        # print("updateQTable")
+        logger.logging("updateQTable", 0)
         reward = abs(self.oppCharacter.getHp() - self.preOppHp) - abs(self.myCharacter.getHp() - self.preMyHp)
         maxFuture = self.maxFutureState()
         x = self.preXState
         y = self.preYState
+        boundX = self.preBoundXState
         act = self.preActionIndex
         # Q(S, A) += LR * (Reward + FR(max(Q(S+1, A))) - Q(S, A))
-        updateValue = self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][act])
+        updateValue = self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][boundX][act])
 
-        # print("last action reward: ", reward, " maxFuture: ", maxFuture, " update value: ", updateValue)
+        logger.logging("last action reward: " + str(reward) + " maxFuture: " + str(maxFuture) + " update value: " + str(updateValue), 0)
 
-        self.QTables[x][y][act] += updateValue
+        self.QTables[x][y][boundX][act] += updateValue
         return
 
     def getCorrespondingValue(self, rangelist, find):
-        # print("getCorrespondingValue")
+        logger.logging("getCorrespondingValue", 0)
         if find < rangelist[0]:
             return 0
         if find >= rangelist[-1]:
@@ -188,19 +221,18 @@ class RLAI(object):
                                 y: < -200 -200~-100 -100~-40 -40~0 0 0~40 40~100 100~200 200<
     '''
     def getState(self, disX, disY, playerX):
-        # print("getState")
-        # print("disX, disY in getState()", disX, disY)
-        XState = self.getCorrespondingValue([20, 50, 85, 100], disX)
-        YState = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], disY)
-        #TODO:
-        boundXstate = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], playerX)
-        # print("XState, YState in getState()", XState, YState)     
-        return XState, YState, boundXstate
+        logger.logging("getState", 0)
+        logger.logging("disX, disY, playerX in getState() " + str(disX) + " " + str(disY) + " " + str(playerX), 0)
+        XState = self.getCorrespondingValue(self.XStates, disX)
+        YState = self.getCorrespondingValue(self.YStates, disY)
+        boundXState = self.getCorrespondingValue(self.boundXStates, playerX)
+        logger.logging("XState, YState, boundXState in getState() " + str(XState) + ", " + str(YState) + ", " + str(boundXState), 0)     
+        return XState, YState, boundXState
     
     '''return avaliable actions list by player's now energy
     '''
     def getAvaliableActions(self):
-        # print("getAvaliableActions")
+        logger.logging("getAvaliableActions", 0)
         avaliableActions = []
         for action in self.actions:
             if self.getActionEnergyCost(action) <= self.energy:
@@ -208,16 +240,15 @@ class RLAI(object):
         return avaliableActions
     
     def getBestActionInQTable(self, avaliableActions):
-        # print("getBestActionInQTable")
+        logger.logging("getBestActionInQTable", 0)
         # print("avaliable actions: ", avaliableActions)
         maxIndex = 0
-        # print("X state: ", self.nowXState, " Y state: ", self.nowYState)
-        maxValue = self.QTables[self.nowXState][self.nowYState][0]
-        # print("maxvalue: ", maxValue)
+        maxValue = self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][0]
+        logger.logging("maxvalue: " + str(maxValue), 0)
         for act in avaliableActions:
             nowIndex = self.actions.index(act)
-            if self.QTables[self.nowXState][self.nowYState][nowIndex] > maxValue:
-                maxValue = self.QTables[self.nowXState][self.nowYState][nowIndex]
+            if self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][nowIndex] > maxValue:
+                maxValue = self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][nowIndex]
                 maxIndex = nowIndex
         
         return self.actions[maxIndex]
@@ -238,8 +269,15 @@ class RLAI(object):
         # action by state
         if np.random.random_sample() <= self.epsilon:
             # print("not random one")
-            self.nowXState, self.nowYState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY())
-            self.preXState, self.preYState = self.nowXState, self.nowYState
+            absoluteX = self.myCharacter.getCenterX()
+            isFacingRight = self.myCharacter.isFront()
+            faceBoundX = absoluteX
+            if isFacingRight:
+                faceBoundX = 960 - absoluteX
+                
+            self.nowXState, self.nowYState, self.nowBoundXState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY(), faceBoundX)
+            logger.logging("complete getState", 0)
+            self.preXState, self.preYState, self.preBoundXState = self.nowXState, self.nowYState, self.nowBoundXState
             action = self.getBestActionInQTable(avaliableActions)
         # action by random
         else:
