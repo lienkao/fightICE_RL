@@ -35,7 +35,7 @@ class RLAI(object):
                          o.AIR_DB,    o.AIR_D_DF_FB,     o.AIR_UB,    o.AIR_F_D_DFB]
         self.frameskip = True
         self.QTablesFolder = QTablesFolder
-        self.pklFile = 'ZEN.pkl'
+        self.pklFile = 'ZEN_v2.0.pkl'
         # greedy parameter
         self.epsilon = 0.8
         # learning rate
@@ -187,13 +187,15 @@ class RLAI(object):
     discrete now state by  abs(x): <20 20~50 50~85 85~100 100< ; 
                                 y: < -200 -200~-100 -100~-40 -40~0 0 0~40 40~100 100~200 200<
     '''
-    def getState(self, disX, disY):
+    def getState(self, disX, disY, playerX):
         # print("getState")
         # print("disX, disY in getState()", disX, disY)
         XState = self.getCorrespondingValue([20, 50, 85, 100], disX)
-        YState = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], disY)   
+        YState = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], disY)
+        #TODO:
+        boundXstate = self.getCorrespondingValue([-200, -100, -40, 0, 1, 40, 100, 200], playerX)
         # print("XState, YState in getState()", XState, YState)     
-        return XState, YState
+        return XState, YState, boundXstate
     
     '''return avaliable actions list by player's now energy
     '''
