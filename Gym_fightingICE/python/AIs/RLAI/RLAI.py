@@ -15,19 +15,11 @@ class Logging(object):
             print(msg)
 
 logger = Logging(1)
+# NOTE: version setting
+version = 'v2.0'
 class QTableManager(object):
-    def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
-        self.folderPath = folderPath
-        self.pickleFileName = os.path.join(folderPath, pklName)
-        self.n_bucket = n_bucket
-        self.n_actions = n_actions
-    
-    def createTable(self):
-        logger.logging("createTable()", 0)
-        QTable = np.zeros(self.n_bucket + (self.n_actions,))
-        self.writeTable(QTable)
-        logger.logging("created QTable", 0)
-        return QTable
+    def __init__(self, folderPath, pklName):
+        self.pickleFileName = os.path.join(os.path.join(folderPath, version), pklName)
 
     def getTable(self):
         try:
@@ -41,23 +33,6 @@ class QTableManager(object):
         
         return QTable
 
-    def writeTable(self, QTable, file = None):
-        logger.logging("in write table", 0)
-        if file == None:
-            pickleFile = open(self.pickleFileName, 'wb+')
-        else:
-            pickleFile = open(file, 'wb+')
-        pickle.dump(QTable, pickleFile)
-        pickleFile.close()
-        return
-   
-    def recordQTableEachGame(self):
-        #NOTE: version file
-        pickleFile = open(os.path.join(self.folderPath, 'ZEN_v2.1_record.pkl'), 'ab+')
-        QTable = self.getTable()
-        pickle.dump(QTable, pickleFile)
-        pickleFile.close()
-        return
 
         
 
@@ -76,13 +51,7 @@ class RLAI(object):
         self.frameskip = True
         self.QTablesFolder = QTablesFolder
         #NOTE: version file
-        self.pklFile = 'ZEN_v2.1.pkl'
-        # greedy parameter
-        self.epsilon = 0.9
-        # learning rate
-        self.learningRate = 0.1
-        # future rate
-        self.futureRate = 1.0
+        self.pklFile = 'ZEN_{}.pkl'.format(version)
 
         self.XStates = [50, 85, 100, 150, 200, 300]
         self.YStates = [0, 40, 120, 200]
@@ -109,25 +78,16 @@ class RLAI(object):
         self.nowYState = -1
         self.nowBoundXState = -1
 
-        # previous State's X and Y index in Q table
-        self.preXState = -1
-        self.preYState = -1
-        self.preBoundXState = -1
 
         # now and previous action's index in actions[]
         self.nowActionIndex = -1
-        self.preActionIndex = -1
-
-        # previous State's myHp and oppHp use to count reward
-        self.preMyHp = -1
-        self.preOppHp = -1
 
         self.roundCount = 0
         
 
         # if self.characterName == "ZEN":
         logger.logging("start init QTManager", 0)
-        self.QTManager = QTableManager(self.QTablesFolder, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1), len(self.actions))
+        self.QTManager = QTableManager(self.QTablesFolder, self.pklFile)
         logger.logging("created QTManager", 0)
         self.QTables = self.QTManager.getTable()
         logger.logging("get QTables", 0)    
@@ -148,19 +108,10 @@ class RLAI(object):
         self.nowXState = -1
         self.nowYState = -1
         self.nowBoundXState = -1
-        self.preXState = -1
-        self.preYState = -1
-        self.preBoundXState = -1
         self.nowActionIndex = -1
-        self.preActionIndex = -1
-        self.preMyHp = -1
-        self.preOppHp = -1
         self.roundCount += 1
         if self.roundCount >= 3:
             print("Game End!")
-            self.QTManager.writeTable(self.QTables)
-            self.QTManager.recordQTableEachGame()
-            logger.logging("Finish store QTable~", 1)
         return
 
     # Please define this method when you use FightingICE version 4.00 or later
@@ -186,43 +137,6 @@ class RLAI(object):
         logger.logging("complete get energy cost", 0)
         return ret
     
-
-    # return max Q(S+1, A)
-    def maxFutureState(self):
-        # print("maxFutureState")
-        mAction = self.gateway.jvm.java.util.ArrayDeque()
-        mAction.add(self.actions[self.preActionIndex])
-
-        futureFrame = self.simulator.simulate(self.frameData, self.player, mAction, None, 60)
-
-        disX = abs(futureFrame.getDistanceX())
-        disY = futureFrame.getDistanceY()
-        absoluteX = self.myCharacter.getCenterX()
-        isFacingRight = self.myCharacter.isFront()
-        faceBoundX = absoluteX
-        if isFacingRight:
-            faceBoundX = 960 - absoluteX
-        futureX, futureY, futureBoundX = self.getState(disX, disY, faceBoundX)
-        
-        return self.QTables[futureX][futureY][futureBoundX].max()
-    
-    ''' update Q table by last time's state and action
-    '''
-    def updateQTable(self):
-        logger.logging("updateQTable", 0)
-        reward = abs(self.oppCharacter.getHp() - self.preOppHp) - abs(self.myCharacter.getHp() - self.preMyHp)
-        maxFuture = self.maxFutureState()
-        x = self.preXState
-        y = self.preYState
-        boundX = self.preBoundXState
-        act = self.preActionIndex
-        # Q(S, A) += LR * (Reward + FR(max(Q(S+1, A))) - Q(S, A))
-        updateValue = self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][boundX][act])
-
-        logger.logging("last action reward: " + str(reward) + " maxFuture: " + str(maxFuture) + " update value: " + str(updateValue), 0)
-
-        self.QTables[x][y][boundX][act] += updateValue
-        return
 
     def getCorrespondingValue(self, rangelist, find):
         logger.logging("getCorrespondingValue", 0)
@@ -270,13 +184,10 @@ class RLAI(object):
         
         return self.actions[maxIndex]
     
-    ''' get Action 80% by State 20% random
+    ''' get Action by state
     '''
     def getAction(self):
         # print("getAction")
-        self.preMyHp = self.myCharacter.getHp()
-        self.preOppHp = self.oppCharacter.getHp()
-        
         avaliableActions = self.getAvaliableActions()
 
         # print("complete getAvaliableActions, avaliableActions: ", avaliableActions)
@@ -284,24 +195,16 @@ class RLAI(object):
         # print(action)
         # print("start random")
         # action by state
-        if np.random.random_sample() <= self.epsilon:
-            # print("not random one")
-            absoluteX = self.myCharacter.getCenterX()
-            isFacingRight = self.myCharacter.isFront()
-            faceBoundX = absoluteX
-            if isFacingRight:
-                faceBoundX = 960 - absoluteX
-                
-            self.nowXState, self.nowYState, self.nowBoundXState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY(), faceBoundX)
-            logger.logging("complete getState", 0)
-            self.preXState, self.preYState, self.preBoundXState = self.nowXState, self.nowYState, self.nowBoundXState
-            action = self.getBestActionInQTable(avaliableActions)
-        # action by random
-        else:
-            # print("random one")
-            action = choice(avaliableActions)
-            # print("random choice done")
-        # print("get action ", action)
+        absoluteX = self.myCharacter.getCenterX()
+        isFacingRight = self.myCharacter.isFront()
+        faceBoundX = absoluteX
+        if isFacingRight:
+            faceBoundX = 960 - absoluteX
+            
+        self.nowXState, self.nowYState, self.nowBoundXState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY(), faceBoundX)
+        logger.logging("complete getState", 0)
+        action = self.getBestActionInQTable(avaliableActions)
+        
         return action
     
     def processing(self):
@@ -329,13 +232,9 @@ class RLAI(object):
 
         self.energy = self.myCharacter.getEnergy()
         # print("my energy: ", self.energy)
-        # previous action is done, update Q table
-        if self.preActionIndex != -1:
-            self.updateQTable()
         
         # get action by now state and record it
         action = self.getAction()
-        self.preActionIndex = self.actions.index(action)
 
         self.commandCenter.commandCall(action.name())
 

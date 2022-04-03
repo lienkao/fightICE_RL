@@ -19,7 +19,7 @@ def check_args(args):
 
 
 def start_game():
-        p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables/v2.0")
+        p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables")
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)

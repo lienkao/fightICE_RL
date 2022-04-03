@@ -9,3 +9,4 @@ from .MctsAi import MctsAi
 from .SkillAI import SkillAI
 from .machete import Machete
 from .RLAI.RLAI import RLAI
+from .RLAI.RLAI_train import RLAI_train
