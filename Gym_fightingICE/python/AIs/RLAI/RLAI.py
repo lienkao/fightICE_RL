@@ -52,7 +52,8 @@ class QTableManager(object):
         return
    
     def recordQTableEachGame(self):
-        pickleFile = open(os.path.join(self.folderPath, 'ZEN_v2.0_record.pkl'), 'ab+')
+        #NOTE: version file
+        pickleFile = open(os.path.join(self.folderPath, 'ZEN_v2.1_record.pkl'), 'ab+')
         QTable = self.getTable()
         pickle.dump(QTable, pickleFile)
         pickleFile.close()
@@ -74,11 +75,12 @@ class RLAI(object):
                          o.AIR_DB,    o.AIR_D_DF_FB,     o.AIR_UB,    o.AIR_F_D_DFB]
         self.frameskip = True
         self.QTablesFolder = QTablesFolder
-        self.pklFile = 'ZEN_v2.0.pkl'
+        #NOTE: version file
+        self.pklFile = 'ZEN_v2.1.pkl'
         # greedy parameter
-        self.epsilon = 0.8
+        self.epsilon = 0.9
         # learning rate
-        self.learningRate = 0.2
+        self.learningRate = 0.1
         # future rate
         self.futureRate = 1.0
 
@@ -158,7 +160,7 @@ class RLAI(object):
             print("Game End!")
             self.QTManager.writeTable(self.QTables)
             self.QTManager.recordQTableEachGame()
-            logger.logging("Finish store Qtable~", 1)
+            logger.logging("Finish store QTable~", 1)
         return
 
     # Please define this method when you use FightingICE version 4.00 or later
