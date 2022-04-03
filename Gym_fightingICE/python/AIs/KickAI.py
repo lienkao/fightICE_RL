@@ -51,7 +51,7 @@ class KickAI(object):
         self.cc.skillCancel()     
 
         # Just spam kick
-        self.cc.commandCall("B")
+        self.cc.commandCall("THROW_B")
                         
     # This part is mandatory
     class Java:
