@@ -1,5 +1,5 @@
 import pickle
-pickleFile = open('ZEN_v2.0_record.pkl', "rb")
+pickleFile = open('ZEN_v2.0.pkl', "rb")
 cnt = 0
 try:
     while True:
@@ -9,4 +9,4 @@ except:
     pass
 
 
-print(cnt)
+print(QTables)

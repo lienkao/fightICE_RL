@@ -14,7 +14,7 @@ class Logging(object):
         if level >= self.mode:
             print(msg)
 
-logger = Logging(0)
+logger = Logging(1)
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
@@ -83,7 +83,7 @@ class RLAI(object):
         self.futureRate = 1.0
 
         self.XStates = [50, 85, 100, 150, 200, 300]
-        self.YStates = [-70, 0, 40, 120, 200]
+        self.YStates = [0, 40, 120, 200]
         self.boundXStates = [50, 150, 475, 800, 900]
 
     def close(self):
