@@ -2,9 +2,10 @@ import os
 from matplotlib import pyplot as plt
 
 data = []
-for fname in os.listdir():
+folder_path = './RL_Test_v3.0'
+for fname in os.listdir(folder_path):
     if 'Mach' not in fname: continue
-    with open(fname) as infile:
+    with open(os.path.join(folder_path, fname)) as infile:
         for line in infile:
             #print(line)
             if len(line)==0: break

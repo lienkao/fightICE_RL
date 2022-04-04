@@ -16,6 +16,7 @@ class Logging(object):
 
 logger = Logging(1)
 version = 'v3.0'
+TRAIN_MODE = False
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
@@ -79,7 +80,9 @@ class RLAI(object):
         #NOTE: version file
         self.pklFile = 'ZEN_{}.pkl'.format(version)
         # greedy parameter
-        self.epsilon = 1.0
+        self.epsilon = 0.9
+        if not TRAIN_MODE:
+            self.epsilon = 1.0
         # learning rate
         self.learningRate = 0.1
         # future rate
@@ -163,9 +166,10 @@ class RLAI(object):
         self.roundCount += 1
         if self.roundCount >= 3:
             print("Game End!")
-            self.QTManager.writeTable(self.QTables)
-            self.QTManager.recordQTableEachGame()
-            logger.logging("Finish store QTable~", 1)
+            if TRAIN_MODE :
+                self.QTManager.writeTable(self.QTables)
+                self.QTManager.recordQTableEachGame()
+                logger.logging("Finish store QTable~", 1)
         return
 
     # Please define this method when you use FightingICE version 4.00 or later
@@ -202,12 +206,14 @@ class RLAI(object):
 
         disX = abs(futureFrame.getDistanceX())
         disY = futureFrame.getDistanceY()
-        absoluteX = self.myCharacter.getCenterX()
-        isFacingRight = self.myCharacter.isFront()
+        futurePlayer = futureFrame.getCharacter(self.player)
+
+        absoluteX = futurePlayer.getCenterX()
+        isFacingRight = futurePlayer.isFront()
         faceBoundX = absoluteX
         if isFacingRight: faceBoundX = 960 - absoluteX
 
-        power = futureFrame.getCharacter(self.player).getEnergy()
+        power = futurePlayer.getEnergy()
 
         futureX, futureY, futureBoundX, power = self.getState(disX, disY, faceBoundX, power)
         
@@ -327,6 +333,7 @@ class RLAI(object):
         self.energy = self.myCharacter.getEnergy()
         # print("my energy: ", self.energy)
         # previous action is done, update Q table
+        #TODO: when game play update or not
         if self.preActionIndex != -1:
             self.updateQTable()
         
