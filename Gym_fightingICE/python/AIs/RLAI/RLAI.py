@@ -14,9 +14,9 @@ class Logging(object):
         if level >= self.mode:
             print(msg)
 
-logger = Logging(1)
-version = 'v3.0'
-TRAIN_MODE = False
+logger = Logging(0)
+version = 'v4.1'
+TRAIN_MODE = True
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
@@ -195,6 +195,15 @@ class RLAI(object):
         logger.logging("complete get energy cost", 0)
         return ret
     
+    '''return avaliable actions list by player's now energy
+    '''
+    def getAvaliableActions(self):
+        logger.logging("getAvaliableActions", 0)
+        avaliableActions = []
+        for action in self.actions:
+            if self.getActionEnergyCost(action) <= self.energy:
+                avaliableActions.append(action)
+        return avaliableActions
 
     # return max Q(S+1, A)
     def maxFutureState(self):
@@ -282,7 +291,7 @@ class RLAI(object):
         # print("getAction")
         self.preMyHp = self.myCharacter.getHp()
         self.preOppHp = self.oppCharacter.getHp()
-        
+        avaliableActions = self.getAvaliableActions()
         action = self.gateway.jvm.enumerate.Action.STAND_B
         # print(action)
         # print("start random")
@@ -298,11 +307,11 @@ class RLAI(object):
             self.nowXState, self.nowYState, self.nowBoundXState, self.nowPowerState= self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY(), faceBoundX, self.energy)
             logger.logging("complete getState", 0)
             self.preXState, self.preYState, self.preBoundXState, self.prePowerState= self.nowXState, self.nowYState, self.nowBoundXState, self.prePowerState
-            action = self.getBestActionInQTable(self.actions)
+            action = self.getBestActionInQTable(avaliableActions)
         # action by random
         else:
             # print("random one")
-            action = choice(self.actions)
+            action = choice(avaliableActions)
             # print("random choice done")
         # print("get action ", action)
         return action
