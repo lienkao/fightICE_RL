@@ -15,8 +15,8 @@ class Logging(object):
             print(msg)
 
 logger = Logging(1)
-version = 'v3.0'
-TRAIN_MODE = False
+version = 'v4.0'
+TRAIN_MODE = True
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
