@@ -14,9 +14,9 @@ class Logging(object):
         if level >= self.mode:
             print(msg)
 
-logger = Logging(0)
+logger = Logging(1)
 version = 'v4.1'
-TRAIN_MODE = True
+TRAIN_MODE = False
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
@@ -165,7 +165,7 @@ class RLAI(object):
         self.preOppHp = -1
         self.roundCount += 1
         if self.roundCount >= 3:
-            print("Game End!")
+            print("Game End! MODE:{}".format(TRAIN_MODE))
             if TRAIN_MODE :
                 self.QTManager.writeTable(self.QTables)
                 self.QTManager.recordQTableEachGame()
@@ -195,15 +195,15 @@ class RLAI(object):
         logger.logging("complete get energy cost", 0)
         return ret
     
-    '''return avaliable actions list by player's now energy
+    '''return Available actions list by player's now energy
     '''
-    def getAvaliableActions(self):
-        logger.logging("getAvaliableActions", 0)
-        avaliableActions = []
+    def getAvailableActions(self):
+        logger.logging("getAvailableActions", 0)
+        AvailableActions = []
         for action in self.actions:
             if self.getActionEnergyCost(action) <= self.energy:
-                avaliableActions.append(action)
-        return avaliableActions
+                AvailableActions.append(action)
+        return AvailableActions
 
     # return max Q(S+1, A)
     def maxFutureState(self):
@@ -291,7 +291,7 @@ class RLAI(object):
         # print("getAction")
         self.preMyHp = self.myCharacter.getHp()
         self.preOppHp = self.oppCharacter.getHp()
-        avaliableActions = self.getAvaliableActions()
+        AvailableActions = self.getAvailableActions()
         action = self.gateway.jvm.enumerate.Action.STAND_B
         # print(action)
         # print("start random")
@@ -307,11 +307,11 @@ class RLAI(object):
             self.nowXState, self.nowYState, self.nowBoundXState, self.nowPowerState= self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY(), faceBoundX, self.energy)
             logger.logging("complete getState", 0)
             self.preXState, self.preYState, self.preBoundXState, self.prePowerState= self.nowXState, self.nowYState, self.nowBoundXState, self.prePowerState
-            action = self.getBestActionInQTable(avaliableActions)
+            action = self.getBestActionInQTable(AvailableActions)
         # action by random
         else:
             # print("random one")
-            action = choice(avaliableActions)
+            action = choice(AvailableActions)
             # print("random choice done")
         # print("get action ", action)
         return action
