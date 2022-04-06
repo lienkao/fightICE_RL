@@ -16,7 +16,7 @@ class Logging(object):
 
 logger = Logging(1)
 version = 'v4.3'
-TRAIN_MODE = True
+TRAIN_MODE = False
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
@@ -166,9 +166,9 @@ class RLAI(object):
         self.roundCount += 1
         if self.roundCount >= 3:
             if TRAIN_MODE:
-                print("Game End! MODE: TEST")
-            else:
                 print("Game End! MODE: TRAIN")
+            else:
+                print("Game End! MODE: TEST")
             if TRAIN_MODE :
                 self.QTManager.writeTable(self.QTables)
                 self.QTManager.recordQTableEachGame()
