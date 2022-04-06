@@ -165,7 +165,10 @@ class RLAI(object):
         self.preOppHp = -1
         self.roundCount += 1
         if self.roundCount >= 3:
-            print("Game End! MODE:{}".format(TRAIN_MODE))
+            if TRAIN_MODE:
+                print("Game End! MODE: TEST")
+            else:
+                print("Game End! MODE: TRAIN")
             if TRAIN_MODE :
                 self.QTManager.writeTable(self.QTables)
                 self.QTManager.recordQTableEachGame()
