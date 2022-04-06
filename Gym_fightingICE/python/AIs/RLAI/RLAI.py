@@ -15,8 +15,8 @@ class Logging(object):
             print(msg)
 
 logger = Logging(1)
-version = 'v4.1'
-TRAIN_MODE = False
+version = 'v4.3'
+TRAIN_MODE = True
 class QTableManager(object):
     def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
@@ -86,7 +86,7 @@ class RLAI(object):
         # learning rate
         self.learningRate = 0.1
         # future rate
-        self.futureRate = 0.9
+        self.futureRate = 0.5
 
         self.XStates = [50, 85, 100, 150, 200, 300]
         self.YStates = [0, 40, 120, 200]
