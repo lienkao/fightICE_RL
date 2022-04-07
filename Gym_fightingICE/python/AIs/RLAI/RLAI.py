@@ -21,6 +21,7 @@ class QTableManager(object):
         self.pickleFileName = os.path.join(os.path.join(folderPath, version), pklName)
         self.n_bucket = n_bucket
         self.n_actions = n_actions
+        self.version = version
     
     def createTable(self):
         logger.logging("createTable()", 0)
@@ -53,7 +54,7 @@ class QTableManager(object):
    
     def recordQTableEachGame(self):
         #NOTE: version file
-        pickleFile = open(os.path.join(os.path.join(self.folderPath, version), 'ZEN_{}_record.pkl'.format(version)), 'ab+')
+        pickleFile = open(os.path.join(os.path.join(self.folderPath, self.version), 'ZEN_{}_record.pkl'.format(self.version)), 'ab+')
         QTable = self.getTable()
         pickle.dump(QTable, pickleFile)
         pickleFile.close()
