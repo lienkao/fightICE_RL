@@ -87,7 +87,7 @@ class RLAI(object):
         # learning rate
         self.learningRate = 0.1
         # future rate
-        self.futureRate = 0.5
+        self.futureRate = 0.3
 
         self.XStates = [50, 85, 100, 150, 200, 300]
         self.YStates = [0, 40, 120, 200]

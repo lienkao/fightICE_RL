@@ -19,6 +19,7 @@ for row in data:
 
 
 y = []
+cnt = 0
 for row in data:
     y.append(float(row[2]) / (float(row[2]) + float(row[1])))
 plt.plot(y)
