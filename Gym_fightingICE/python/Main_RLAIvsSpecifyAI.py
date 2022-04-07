@@ -25,10 +25,19 @@ def check_args(args):
                 TRAIN_MODE = True
             elif args[i+1] == "test":
                 TRAIN_MODE = False
-
+        elif args[i] == "-e" or args[i] == "--e" or args[i] == "--epsilon":
+            global EPSILON
+            EPSILON = args[i+1]
+        elif args[i] == "--lr" or args[i] == "--learningRate":
+            global LEARNING_RATE
+            LEARNING_RATE = args[i+1]
+        elif args[i] == "--fr" or args[i] == "--futureRate":
+            global FUTURE_RATE
+            FUTURE_RATE = args[i+1]
 def start_game():
-        print("version: {}, Mode: {}".format(VERSION, TRAIN_MODE))
-        p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables", VERSION, TRAIN_MODE)
+        print("version: {}, Train Mode: {}".format(VERSION, TRAIN_MODE))
+        print("epsilon: {}, learning Rate: {}, future Rate: {}".format(EPSILON, LEARNING_RATE, FUTURE_RATE))
+        p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables", VERSION, TRAIN_MODE, EPSILON, LEARNING_RATE, FUTURE_RATE)
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)
@@ -58,10 +67,13 @@ def main_process():
 
 args = sys.argv
 argc = len(args)
-VERSION = 'v5.0'
+VERSION = 'v0.0'
 TRAIN_MODE = True
 GAME_NUM = 1
 OPPO_AI = "Machete"
+EPSILON = 0.9
+LEARNING_RATE = 0.1
+FUTURE_RATE = 0.1
 gateway = JavaGateway(gateway_parameters=GatewayParameters(port=4242), callback_server_parameters=CallbackServerParameters())
 manager = gateway.entry_point
 

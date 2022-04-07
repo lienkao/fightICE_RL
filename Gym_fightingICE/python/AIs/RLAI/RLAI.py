@@ -63,7 +63,7 @@ class QTableManager(object):
         
 
 class RLAI(object):
-    def __init__(self, gateway, QTablesFolder, version = 'v0.0', train_mode = True):
+    def __init__(self, gateway, QTablesFolder, version = 'v0.0', train_mode = True, epsilon = 0.9, learningRate = 0.1, futureRate = 0.1):
         
         
         self.gateway = gateway
@@ -81,13 +81,13 @@ class RLAI(object):
         self.pklFile = 'ZEN_{}.pkl'.format(version)
         self.train_mode = train_mode
         # greedy parameter
-        self.epsilon = 0.9
+        self.epsilon = epsilon
         if not self.train_mode:
             self.epsilon = 1.0
         # learning rate
-        self.learningRate = 0.1
+        self.learningRate = learningRate
         # future rate
-        self.futureRate = 0.3
+        self.futureRate = futureRate
 
         self.XStates = [50, 85, 100, 150, 200, 300]
         self.YStates = [0, 40, 120, 200]
