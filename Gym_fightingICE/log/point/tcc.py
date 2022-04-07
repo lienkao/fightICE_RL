@@ -2,7 +2,7 @@ import os
 from matplotlib import pyplot as plt
 
 data = []
-folder_path = './RL_train_v4.1'
+folder_path = './RL_Test_v4.1'
 for fname in os.listdir(folder_path):
     if 'Mach' not in fname: continue
     with open(os.path.join(folder_path, fname)) as infile:

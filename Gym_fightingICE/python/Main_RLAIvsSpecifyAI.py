@@ -16,10 +16,19 @@ def check_args(args):
         elif args[i] == "-o" or args[i] == "--o" or args[i] == "--opponent":
             global OPPO_AI
             OPPO_AI = args[i+1]
-
+        elif args[i] == "-v" or args[i] == "--v" or args[i] == "--version":
+            global VERSION
+            VERSION = args[i+1]
+        elif args[i] == "-m" or args[i] == "--m" or args[i] == "--mode":
+            global TRAIN_MODE
+            if args[i+1] == "train":
+                TRAIN_MODE = True
+            elif args[i+1] == "test":
+                TRAIN_MODE = False
 
 def start_game():
-        p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables")
+        print("version: {}, Mode: {}".format(VERSION, TRAIN_MODE))
+        p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables", VERSION, TRAIN_MODE)
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)
@@ -49,6 +58,8 @@ def main_process():
 
 args = sys.argv
 argc = len(args)
+VERSION = 'v5.0'
+TRAIN_MODE = True
 GAME_NUM = 1
 OPPO_AI = "Machete"
 gateway = JavaGateway(gateway_parameters=GatewayParameters(port=4242), callback_server_parameters=CallbackServerParameters())

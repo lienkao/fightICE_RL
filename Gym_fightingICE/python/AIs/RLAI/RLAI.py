@@ -15,10 +15,8 @@ class Logging(object):
             print(msg)
 
 logger = Logging(1)
-version = 'v4.3'
-TRAIN_MODE = False
 class QTableManager(object):
-    def __init__(self, folderPath, pklName, n_bucket:tuple, n_actions:int):
+    def __init__(self, folderPath, version, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
         self.pickleFileName = os.path.join(os.path.join(folderPath, version), pklName)
         self.n_bucket = n_bucket
@@ -64,7 +62,7 @@ class QTableManager(object):
         
 
 class RLAI(object):
-    def __init__(self, gateway, QTablesFolder):
+    def __init__(self, gateway, QTablesFolder, version = 'v0.0', train_mode = True):
         
         
         self.gateway = gateway
@@ -78,10 +76,12 @@ class RLAI(object):
         self.frameskip = True
         self.QTablesFolder = QTablesFolder
         #NOTE: version file
+        self.version = version
         self.pklFile = 'ZEN_{}.pkl'.format(version)
+        self.train_mode = train_mode
         # greedy parameter
         self.epsilon = 0.9
-        if not TRAIN_MODE:
+        if not self.train_mode:
             self.epsilon = 1.0
         # learning rate
         self.learningRate = 0.1
@@ -133,7 +133,7 @@ class RLAI(object):
 
         # if self.characterName == "ZEN":
         logger.logging("start init QTManager", 0)
-        self.QTManager = QTableManager(self.QTablesFolder, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1, len(self.powerStates) + 1), len(self.actions))
+        self.QTManager = QTableManager(self.QTablesFolder, self.version, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1, len(self.powerStates) + 1), len(self.actions))
         logger.logging("created QTManager", 0)
         self.QTables = self.QTManager.getTable()
         logger.logging("get QTables", 0)    
@@ -165,11 +165,11 @@ class RLAI(object):
         self.preOppHp = -1
         self.roundCount += 1
         if self.roundCount >= 3:
-            if TRAIN_MODE:
+            if self.train_mode:
                 print("Game End! MODE: TRAIN")
             else:
                 print("Game End! MODE: TEST")
-            if TRAIN_MODE :
+            if self.train_mode :
                 self.QTManager.writeTable(self.QTables)
                 self.QTManager.recordQTableEachGame()
                 logger.logging("Finish store QTable~", 1)
