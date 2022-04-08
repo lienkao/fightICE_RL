@@ -36,7 +36,8 @@ def check_args(args):
             FUTURE_RATE = args[i+1]
 def start_game():
         print("version: {}, Train Mode: {}".format(VERSION, TRAIN_MODE))
-        print("epsilon: {}, learning Rate: {}, future Rate: {}".format(EPSILON, LEARNING_RATE, FUTURE_RATE))
+        if TRAIN_MODE:
+            print("epsilon: {}, learning Rate: {}, future Rate: {}".format(EPSILON, LEARNING_RATE, FUTURE_RATE))
         p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables", VERSION, TRAIN_MODE, EPSILON, LEARNING_RATE, FUTURE_RATE)
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)

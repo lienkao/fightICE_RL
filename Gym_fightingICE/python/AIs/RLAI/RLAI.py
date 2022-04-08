@@ -347,7 +347,7 @@ class RLAI(object):
         # print("my energy: ", self.energy)
         # previous action is done, update Q table
         #TODO: when game play update or not
-        if self.preActionIndex != -1:
+        if self.preActionIndex != -1 and self.train_mode:
             self.updateQTable()
         
         # get action by now state and record it
