@@ -85,15 +85,9 @@ class RLAI(object):
         if not self.train_mode:
             self.epsilon = 1.0
         # learning rate
-<<<<<<< HEAD
-        self.learningRate = 0.03
-        # future rate
-        self.futureRate = 0.1
-=======
         self.learningRate = learningRate
         # future rate
         self.futureRate = futureRate
->>>>>>> f02f98b7e7d39d6a7a030834c5e7c4af53cfddd9
 
         self.XStates = [50, 85, 100, 150, 200, 300]
         self.YStates = [0, 40, 120, 200]
