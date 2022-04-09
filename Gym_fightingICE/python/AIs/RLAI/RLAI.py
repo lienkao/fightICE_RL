@@ -298,10 +298,12 @@ class RLAI(object):
         AvailableActions = self.getAvailableActions()
         action = self.gateway.jvm.enumerate.Action.STAND_B
         # print(action)
-        # print("start random")
+        logger.logging("start random", 0)
+        randomNum = np.random.random_sample()
+        logger.logging(str(randomNum), 0)
         # action by state
-        if np.random.random_sample() <= self.epsilon:
-            # print("not random one")
+        if randomNum <= self.epsilon:
+            logger.logging("not random one", 0)
             absoluteX = self.myCharacter.getCenterX()
             isFacingRight = self.myCharacter.isFront()
             faceBoundX = absoluteX
@@ -314,7 +316,7 @@ class RLAI(object):
             action = self.getBestActionInQTable(AvailableActions)
         # action by random
         else:
-            # print("random one")
+            logger.logging("random one", 0)
             action = choice(AvailableActions)
             # print("random choice done")
         # print("get action ", action)
