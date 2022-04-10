@@ -27,13 +27,13 @@ def check_args(args):
                 TRAIN_MODE = False
         elif args[i] == "-e" or args[i] == "--e" or args[i] == "--epsilon":
             global EPSILON
-            EPSILON = args[i+1]
+            EPSILON = float(args[i+1])
         elif args[i] == "--lr" or args[i] == "--learningRate":
             global LEARNING_RATE
-            LEARNING_RATE = args[i+1]
+            LEARNING_RATE = float(args[i+1])
         elif args[i] == "--fr" or args[i] == "--futureRate":
             global FUTURE_RATE
-            FUTURE_RATE = args[i+1]
+            FUTURE_RATE = float(args[i+1])
 def start_game():
         print("version: {}, Train Mode: {}".format(VERSION, TRAIN_MODE))
         if TRAIN_MODE:

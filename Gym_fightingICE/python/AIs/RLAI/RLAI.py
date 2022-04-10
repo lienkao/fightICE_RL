@@ -67,13 +67,15 @@ class RLAI(object):
         
         
         self.gateway = gateway
-        o = self.gateway.jvm.enumerate.Action
-        # actions:         Kick    Crouch Kick  Crouch Strong Kick    Slide Kick       
-        self.actions = [o.STAND_B, o.CROUCH_B,     o.CROUCH_FB,    o.STAND_D_DB_BB,
-        #                  Projectile    Strong Projectile   Forward Jump Fist   Jump Kick
-                         o.STAND_D_DF_FB, o.STAND_D_DF_FC,    o.STAND_D_DB_BA,    o.AIR_B,
-        #              Jump Low Kick  Jump Projectile  Jump High Kick  Jump Strong Kick
-                         o.AIR_DB,    o.AIR_D_DF_FB,     o.AIR_UB,    o.AIR_F_D_DFB]
+        o = self.gateway.jvm.enumerate.Action      
+        self.actions = [o.AIR_GUARD, o.AIR_A, o.AIR_B, o.AIR_DA, o.AIR_DB,
+                        o.AIR_FA, o.AIR_FB, o.AIR_UA, o.AIR_UB, o.AIR_D_DF_FA, o.AIR_D_DF_FB,
+                        o.AIR_F_D_DFA, o.AIR_F_D_DFB, o.AIR_D_DB_BA, o.AIR_D_DB_BB, #15
+                        o.STAND_B, o.BACK_STEP, o.FORWARD_WALK, o.DASH, o.JUMP, o.FOR_JUMP,
+                        o.BACK_JUMP, o.STAND_GUARD, o.CROUCH_GUARD, o.THROW_A, o.THROW_B,
+                        o.STAND_A, o.STAND_D_DB_BA, o.CROUCH_A, o.CROUCH_B, o.STAND_FA,
+                        o.STAND_FB, o.CROUCH_FA, o.CROUCH_FB, o.STAND_D_DF_FA, o.STAND_D_DF_FB, 
+                        o.STAND_F_D_DFA, o.STAND_F_D_DFB, o.STAND_D_DB_BB, o.STAND_D_DF_FC] #
         self.frameskip = True
         self.QTablesFolder = QTablesFolder
         #NOTE: version file
@@ -90,7 +92,7 @@ class RLAI(object):
         self.futureRate = futureRate
 
         self.XStates = [50, 85, 100, 150, 200, 300]
-        self.YStates = [0, 40, 120, 200]
+        self.YStates = [-200, -120, -40, 0, 40, 120, 200]
         self.boundXStates = [50, 150, 475, 800, 900]
         self.powerStates = [20, 40, 50, 150]
 
@@ -204,9 +206,15 @@ class RLAI(object):
     def getAvailableActions(self):
         logger.logging("getAvailableActions", 0)
         AvailableActions = []
-        for action in self.actions:
-            if self.getActionEnergyCost(action) <= self.energy:
-                AvailableActions.append(action)
+        if self.myCharacter.getState() == self.gateway.jvm.enumerate.State.AIR:
+            for i in range(0, 15):
+                if self.getActionEnergyCost(self.actions[i]) <= self.energy:
+                    AvailableActions.append(self.actions[i])
+        else:
+            for i in range(15, 40):
+                if self.getActionEnergyCost(self.actions[i]) <= self.energy:
+                    AvailableActions.append(self.actions[i])
+
         return AvailableActions
 
     # return max Q(S+1, A)
@@ -298,10 +306,12 @@ class RLAI(object):
         AvailableActions = self.getAvailableActions()
         action = self.gateway.jvm.enumerate.Action.STAND_B
         # print(action)
-        # print("start random")
+        logger.logging("start random", 0)
+        randomNum = np.random.random_sample()
+        logger.logging(str(randomNum), 0)
         # action by state
-        if np.random.random_sample() <= self.epsilon:
-            # print("not random one")
+        if randomNum <= self.epsilon:
+            logger.logging("not random one", 0)
             absoluteX = self.myCharacter.getCenterX()
             isFacingRight = self.myCharacter.isFront()
             faceBoundX = absoluteX
@@ -314,7 +324,7 @@ class RLAI(object):
             action = self.getBestActionInQTable(AvailableActions)
         # action by random
         else:
-            # print("random one")
+            logger.logging("random one", 0)
             action = choice(AvailableActions)
             # print("random choice done")
         # print("get action ", action)
