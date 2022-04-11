@@ -94,7 +94,8 @@ class RLAI(object):
         self.XStates = [50, 85, 100, 150, 200, 300]
         self.YStates = [-200, -120, -40, 0, 40, 120, 200]
         self.boundXStates = [50, 150, 475, 800, 900]
-        self.powerStates = [20, 40, 50, 150]
+        self.myPowerStates = [40, 50, 150, 250]
+        self.oppPowerStates = [40, 50, 150, 250]
 
     def close(self):
         pass
@@ -116,13 +117,15 @@ class RLAI(object):
         self.nowXState = -1
         self.nowYState = -1
         self.nowBoundXState = -1
-        self.nowPowerState = -1
+        self.nowMyPowerState = -1
+        self.nowOppPowerState = -1
 
         # previous State's X and Y index in Q table
         self.preXState = -1
         self.preYState = -1
         self.preBoundXState = -1
-        self.prePowerState = -1
+        self.preMyPowerState = -1
+        self.preOppPowerState = -1
         # now and previous action's index in actions[]
         self.nowActionIndex = -1
         self.preActionIndex = -1
@@ -136,7 +139,7 @@ class RLAI(object):
 
         # if self.characterName == "ZEN":
         logger.logging("start init QTManager", 0)
-        self.QTManager = QTableManager(self.QTablesFolder, self.version, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1, len(self.powerStates) + 1), len(self.actions))
+        self.QTManager = QTableManager(self.QTablesFolder, self.version, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1, len(self.myPowerStates) + 1, len(self.oppoPowerStates) + 1), len(self.actions))
         logger.logging("created QTManager", 0)
         self.QTables = self.QTManager.getTable()
         logger.logging("get QTables", 0)    
@@ -157,11 +160,13 @@ class RLAI(object):
         self.nowXState = -1
         self.nowYState = -1
         self.nowBoundXState = -1
-        self.nowPowerState = -1
+        self.nowMyPowerState = -1
+        self.nowOppPowerState = -1
         self.preXState = -1
         self.preYState = -1
         self.preBoundXState = -1
-        self.prePowerState = -1
+        self.preMyPowerState = -1
+        self.preOppPowerState = -1
         self.nowActionIndex = -1
         self.preActionIndex = -1
         self.preMyHp = -1
@@ -227,18 +232,19 @@ class RLAI(object):
 
         disX = abs(futureFrame.getDistanceX())
         disY = futureFrame.getDistanceY()
-        futurePlayer = futureFrame.getCharacter(self.player)
+        futureMyPlayer = futureFrame.getCharacter(self.player)
+        futureOppPlayer = futureFrame.getCharacter(not self.player)
 
-        absoluteX = futurePlayer.getCenterX()
-        isFacingRight = futurePlayer.isFront()
+        absoluteX = futureMyPlayer.getCenterX()
+        isFacingRight = futureMyPlayer.isFront()
         faceBoundX = absoluteX
         if isFacingRight: faceBoundX = 960 - absoluteX
 
-        power = futurePlayer.getEnergy()
+        myPower = futureMyPlayer.getEnergy()
+        oppPower = futureOppPlayer.getEnergy()
 
-        futureX, futureY, futureBoundX, power = self.getState(disX, disY, faceBoundX, power)
-        
-        return self.QTables[futureX][futureY][futureBoundX][power].max()
+        futureX, futureY, futureBoundX, futureMyPower, futureOppPower = self.getState(disX, disY, faceBoundX, myPower, oppPower)        
+        return self.QTables[futureX][futureY][futureBoundX][futureMyPower][futureOppPower].max()
     
     ''' update Q table by last time's state and action
     '''
@@ -249,14 +255,15 @@ class RLAI(object):
         x = self.preXState
         y = self.preYState
         boundX = self.preBoundXState
-        power = self.prePowerState
+        myPower = self.preMyPowerState
+        oppPower = self.preOppPowerState
         act = self.preActionIndex
         # Q(S, A) += LR * (Reward + FR(max(Q(S+1, A))) - Q(S, A))
-        updateValue = self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][boundX][power][act])
+        updateValue = self.learningRate * (reward + self.futureRate * maxFuture - self.QTables[x][y][boundX][myPower][oppPower][act])
 
         logger.logging("last action reward: " + str(reward) + " maxFuture: " + str(maxFuture) + " update value: " + str(updateValue), 0)
 
-        self.QTables[x][y][boundX][power][act] += updateValue
+        self.QTables[x][y][boundX][myPower][oppPower][act] += updateValue
         return
 
     def getCorrespondingValue(self, rangelist, find):
@@ -272,27 +279,28 @@ class RLAI(object):
     discrete now state by  abs(x): <20 20~50 50~85 85~100 100< ; 
                                 y: < -200 -200~-100 -100~-40 -40~0 0 0~40 40~100 100~200 200<
     '''
-    def getState(self, disX, disY, playerX, energy):
+    def getState(self, disX, disY, playerX, myEnergy, oppoEnergy):
         logger.logging("getState", 0)
         logger.logging("disX, disY, playerX in getState() " + str(disX) + " " + str(disY) + " " + str(playerX), 0)
         XState = self.getCorrespondingValue(self.XStates, disX)
         YState = self.getCorrespondingValue(self.YStates, disY)
         boundXState = self.getCorrespondingValue(self.boundXStates, playerX)
-        powerState = self.getCorrespondingValue(self.powerStates, energy)
-        logger.logging("XState, YState, boundXState powerState in getState() " + str(XState) + ", " + str(YState) + ", " + str(boundXState) + ", " + str(powerState), 0)     
-        return XState, YState, boundXState, powerState
+        myPowerState = self.getCorrespondingValue(self.myPowerStates, myEnergy)
+        oppoPowerState = self.getCorrespondingValue(self.oppoPowerStates, oppoEnergy)
+        logger.logging("XState, YState, boundXState powerState in getState() " + str(XState) + ", " + str(YState) + ", " + str(boundXState) + ", " + str(myPowerState) + ", " + str(oppoPowerState), 0)     
+        return XState, YState, boundXState, myPowerState, oppoPowerState
     
     
     def getBestActionInQTable(self, actions):
         logger.logging("getBestActionInQTable", 0)
         # print("actions: ", actions)
         maxIndex = 0
-        maxValue = self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][self.nowPowerState][0]
+        maxValue = self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][self.nowMyPowerState][self.nowOppPowerState][0]
         logger.logging("maxvalue: " + str(maxValue), 0)
         for act in actions:
             nowIndex = self.actions.index(act)
-            if self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][self.nowPowerState][nowIndex] > maxValue:
-                maxValue = self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][self.nowPowerState][nowIndex]
+            if self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][self.nowMyPowerState][self.nowOppPowerState][nowIndex] > maxValue:
+                maxValue = self.QTables[self.nowXState][self.nowYState][self.nowBoundXState][self.nowMyPowerState][self.nowOppPowerState][nowIndex]
                 maxIndex = nowIndex
         
         return self.actions[maxIndex]
@@ -318,9 +326,9 @@ class RLAI(object):
             if isFacingRight:
                 faceBoundX = 960 - absoluteX
                 
-            self.nowXState, self.nowYState, self.nowBoundXState, self.nowPowerState= self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY(), faceBoundX, self.energy)
+            self.nowXState, self.nowYState, self.nowBoundXState, self.nowMyPowerState, self.nowOppPowerState = self.getState(abs(self.frameData.getDistanceX()), self.frameData.getDistanceY(), faceBoundX, self.energy, self.oppCharacter.getEnergy())
             logger.logging("complete getState", 0)
-            self.preXState, self.preYState, self.preBoundXState, self.prePowerState= self.nowXState, self.nowYState, self.nowBoundXState, self.prePowerState
+            self.preXState, self.preYState, self.preBoundXState, self.preMyPowerState, self.preOppPowerState = self.nowXState, self.nowYState, self.nowBoundXState, self.nowMyPowerState, self.nowOppPowerState
             action = self.getBestActionInQTable(AvailableActions)
         # action by random
         else:
