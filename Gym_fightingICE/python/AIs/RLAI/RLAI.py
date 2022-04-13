@@ -14,7 +14,7 @@ class Logging(object):
         if level >= self.mode:
             print(msg)
 
-logger = Logging(1)
+logger = Logging(0)
 class QTableManager(object):
     def __init__(self, folderPath, version, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath
@@ -139,7 +139,7 @@ class RLAI(object):
 
         # if self.characterName == "ZEN":
         logger.logging("start init QTManager", 0)
-        self.QTManager = QTableManager(self.QTablesFolder, self.version, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1, len(self.myPowerStates) + 1, len(self.oppoPowerStates) + 1), len(self.actions))
+        self.QTManager = QTableManager(self.QTablesFolder, self.version, self.pklFile, (len(self.XStates) + 1, len(self.YStates) + 1, len(self.boundXStates) + 1, len(self.myPowerStates) + 1, len(self.oppPowerStates) + 1), len(self.actions))
         logger.logging("created QTManager", 0)
         self.QTables = self.QTManager.getTable()
         logger.logging("get QTables", 0)    
@@ -286,7 +286,7 @@ class RLAI(object):
         YState = self.getCorrespondingValue(self.YStates, disY)
         boundXState = self.getCorrespondingValue(self.boundXStates, playerX)
         myPowerState = self.getCorrespondingValue(self.myPowerStates, myEnergy)
-        oppoPowerState = self.getCorrespondingValue(self.oppoPowerStates, oppoEnergy)
+        oppoPowerState = self.getCorrespondingValue(self.oppPowerStates, oppoEnergy)
         logger.logging("XState, YState, boundXState powerState in getState() " + str(XState) + ", " + str(YState) + ", " + str(boundXState) + ", " + str(myPowerState) + ", " + str(oppoPowerState), 0)     
         return XState, YState, boundXState, myPowerState, oppoPowerState
     
