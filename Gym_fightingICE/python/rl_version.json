@@ -8,5 +8,10 @@
         "epsilon": 0.9,
         "future rate": 0.1, 
         "learning rate": 0.03
+    },
+    "v5.0": {
+        "epsilon": 0.9,
+        "future rate": 0.1, 
+        "learning rate": 0.03
     }
 }

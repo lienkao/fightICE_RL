@@ -8,4 +8,4 @@ from .KickAI import KickAI
 from .MctsAi import MctsAi
 from .SkillAI import SkillAI
 from .machete import Machete
-from .RLAI.RLAI_v4 import RLAI
+from .RLAI.RLAI import RLAI
