@@ -1,3 +1,4 @@
+import imp
 import sys
 from time import sleep
 import math
@@ -8,6 +9,7 @@ import AIs
 import os
 import shutil
 from datetime import datetime
+import json
 def check_args(args):
     for i in range(argc):
         if args[i] == "-n" or args[i] == "--n" or args[i] == "--number":
@@ -25,17 +27,16 @@ def check_args(args):
                 TRAIN_MODE = True
             elif args[i+1] == "test":
                 TRAIN_MODE = False
-        elif args[i] == "-e" or args[i] == "--e" or args[i] == "--epsilon":
-            global EPSILON
-            EPSILON = float(args[i+1])
-        elif args[i] == "--lr" or args[i] == "--learningRate":
-            global LEARNING_RATE
-            LEARNING_RATE = float(args[i+1])
-        elif args[i] == "--fr" or args[i] == "--futureRate":
-            global FUTURE_RATE
-            FUTURE_RATE = float(args[i+1])
+        
 def start_game():
         print("version: {}, Train Mode: {}".format(VERSION, TRAIN_MODE))
+        with open('rl_version.json') as f:
+            p = json.loads(f)
+            version_data = p[VERSION]
+            global EPSILON, LEARNING_RATE, FUTURE_RATE
+            EPSILON = version_data["epsilon"]
+            LEARNING_RATE = version_data["learning rate"]
+            FUTURE_RATE = version_data["future rate"]
         if TRAIN_MODE:
             print("epsilon: {}, learning Rate: {}, future Rate: {}".format(EPSILON, LEARNING_RATE, FUTURE_RATE))
         p1 = AIs.RLAI(gateway, "./AIs/RLAI/Qtables", VERSION, TRAIN_MODE, EPSILON, LEARNING_RATE, FUTURE_RATE)
