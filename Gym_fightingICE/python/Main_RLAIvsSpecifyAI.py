@@ -30,8 +30,8 @@ def check_args(args):
         
 def start_game():
         print("version: {}, Train Mode: {}".format(VERSION, TRAIN_MODE))
-        with open('rl_version.json') as f:
-            p = json.loads(f)
+        with open('rl_version.json', 'rb') as f:
+            p = json.loads(f.read())
             version_data = p[VERSION]
             global EPSILON, LEARNING_RATE, FUTURE_RATE
             EPSILON = version_data["epsilon"]
