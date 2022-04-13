@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 
 data = []
 version = input('Version: (vX.X.X)')
-folder_path = './RL_test_{}}'.format(version)
+folder_path = './RL_test_{}'.format(version)
 for fname in os.listdir(folder_path):
     if 'Mach' not in fname: continue
     with open(os.path.join(folder_path, fname)) as infile:
