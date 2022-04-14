@@ -14,7 +14,7 @@ class Logging(object):
         if level >= self.mode:
             print(msg)
 
-logger = Logging(0)
+logger = Logging(1)
 class QTableManager(object):
     def __init__(self, folderPath, version, pklName, n_bucket:tuple, n_actions:int):
         self.folderPath = folderPath

@@ -56,4 +56,4 @@ anim = animation.FuncAnimation(fig, animate, init_func = init, interval = 50)
 
 plt.show()
 
-pickleFile.close
+pickleFile.close()

@@ -130,3 +130,5 @@ __pypackages__/
 
 replay/
 replay_old/
+
+*_record.pkl
