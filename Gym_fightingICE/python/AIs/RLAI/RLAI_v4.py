@@ -352,6 +352,7 @@ class RLAI(object):
         
         # get action by now state and record it
         action = self.getAction()
+        # print(action)
         self.preActionIndex = self.actions.index(action)
 
         self.commandCenter.commandCall(action.name())

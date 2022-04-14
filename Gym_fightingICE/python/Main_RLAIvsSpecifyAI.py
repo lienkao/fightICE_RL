@@ -1,6 +1,6 @@
 import imp
 import sys
-from time import sleep
+from time import sleep, time
 import math
 from py4j.java_gateway import JavaGateway, GatewayParameters, CallbackServerParameters, get_field
 from DisplayInfo import DisplayInfo
@@ -43,14 +43,15 @@ def start_game():
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)
-        print("Start game", "game: {}".format(GAME_NUM))
+        print("Start game, number of game: {}".format(GAME_NUM))
         game = manager.createGame("ZEN", "ZEN",
                                   p1.__class__.__name__,
                                   p2.__class__.__name__,
                                   GAME_NUM)
+        start_time = time()
         manager.runGame(game)
-
-        print("After game")
+        end_time = time()
+        print("End game at {}, total time: {}".format(end_time, end_time - start_time))
         sys.stdout.flush()
 
 def close_gateway():
