@@ -25,11 +25,12 @@ def main(folder_path):
             cnt += 1
         score.append(float(row[2])/(float(row[1])+float(row[2])))
     print(cnt)
-    plt.xlim(0.0, 1.0)
-    plt.ylim(0, 25)
-
-    plt.hist(list(filter(lambda s: s>=0.5, score)), color='red')
-    plt.hist(list(filter(lambda s: s<0.5, score)), color='blue')
+    plt.xlim(0, 1)
+    plt.ylim(0, 40)
+    plt.xticks(np.arange(0.0, 1.0, 0.1))
+    # binwidth = 0.01
+    plt.hist(list(filter(lambda s: s>=0.5, score)), color='red', bins=np.arange(0.0, 1.0, 0.05))
+    plt.hist(list(filter(lambda s: s<0.5, score)), color='blue', bins=np.arange(0.0, 1.0, 0.05))
     plt.title(folder_path)
     plt.savefig(os.path.join(folder_path, 'result'))
     plt.show()
