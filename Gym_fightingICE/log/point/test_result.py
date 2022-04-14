@@ -1,6 +1,6 @@
 import os
 from matplotlib import pyplot as plt
-
+import numpy as np
 def main(folder_path):
     data = []
     for fname in os.listdir(folder_path):
@@ -25,10 +25,14 @@ def main(folder_path):
             cnt += 1
         score.append(float(row[2])/(float(row[1])+float(row[2])))
     print(cnt)
-    plt.hist(score)
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0, 25)
+
+    plt.hist(list(filter(lambda s: s>=0.5, score)), color='red')
+    plt.hist(list(filter(lambda s: s<0.5, score)), color='blue')
     plt.title(folder_path)
     plt.savefig(os.path.join(folder_path, 'result'))
-    # plt.show()
+    plt.show()
     plt.clf()
     '''
     with open('tcc.csv', 'w') as outfile:
@@ -37,10 +41,10 @@ def main(folder_path):
     '''
 if __name__ == '__main__':
 
-    # for folder in os.listdir():
-    #     if 'Test' in folder:
-    #         main(folder)
+    for folder in os.listdir():
+        if 'Test' in folder:
+            main(folder)
 
-    version = input('Version: (vX.X.X)')
-    folder_path = 'RL_Test_{}'.format(version)
-    main(folder_path)
+    # version = input('Version: (vX.X.X)')
+    # folder_path = 'RL_Test_{}'.format(version)
+    # main(folder_path)
