@@ -10,9 +10,9 @@ def getData(table):
     for x in table:
         for y in x:
             for bound in y:
-                data.append(bound[4])
-                # for power in bound:
-                #     data.append(power)
+                # data.append(bound[4])
+                for opppower in bound[4]:
+                    data.append(opppower)
     return data
 
 version = input('Version: (vX.X.X): ')
@@ -40,17 +40,17 @@ fig = plt.figure()
 
 
 data = getData(Qtable)
-ax = sns.heatmap(data, yticklabels = False, center = 0, vmax = max, vmin = min)
+ax = sns.heatmap(data, yticklabels = False, center = 0, vmax = 5, vmin = -5)
 
 def init():
     plt.clf()
-    ax = sns.heatmap(data, yticklabels = False, center = 0, vmax = max, vmin = min)
+    ax = sns.heatmap(data, yticklabels = False, center = 0, vmax = 5, vmin = -5)
 
 def animate(i):
     plt.clf()
     Qtable = pickle.load(pickleFile)
     data = getData(Qtable)
-    ax = sns.heatmap(data, yticklabels = False, center = 0, vmax = max, vmin = min)
+    ax = sns.heatmap(data, yticklabels = False, center = 0, vmax = 5, vmin = -5)
 
 anim = animation.FuncAnimation(fig, animate, init_func = init, interval = 50)
 
