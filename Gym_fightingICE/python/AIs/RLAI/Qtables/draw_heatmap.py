@@ -10,9 +10,9 @@ def getData(table):
     for x in table:
         for y in x:
             for bound in y:
-                # data.append(bound[4])
-                for opppower in bound[4]:
-                    data.append(opppower)
+                data.append(bound[4])
+                # for opppower in bound[4]:
+                #     data.append(opppower)
     return data
 
 version = input('Version: (vX.X.X): ')
