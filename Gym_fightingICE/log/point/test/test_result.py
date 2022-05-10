@@ -33,7 +33,7 @@ def main(folder_path):
     plt.hist(list(filter(lambda s: s<0.5, score)), color='blue', bins=np.arange(0.0, 1.0, 0.05))
     plt.title(folder_path)
     plt.savefig(os.path.join(folder_path, folder_path)+'.png')
-    # plt.show()
+    plt.show()
     plt.clf()
     '''
     with open('tcc.csv', 'w') as outfile:

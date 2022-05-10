@@ -372,7 +372,12 @@ class RLAI(object):
         action = self.getAction()
         self.preActionIndex = self.actions.index(action)
 
-        self.commandCenter.commandCall(action.name())
+        if action.name() == 'STAND_GUARD':
+            self.commandCenter.commandCall('4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4')
+        elif action.name() == 'CROUCH_GUARD':
+            self.commandCenter.commandCall('1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1')
+        else:
+            self.commandCenter.commandCall(action.name())
 
 
     
