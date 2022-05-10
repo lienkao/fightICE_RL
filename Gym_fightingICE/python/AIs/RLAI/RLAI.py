@@ -68,14 +68,14 @@ class RLAI(object):
         
         self.gateway = gateway
         o = self.gateway.jvm.enumerate.Action      
-        self.actions = [o.AIR_GUARD, o.AIR_A, o.AIR_B, o.AIR_DA, o.AIR_DB,
-                        o.AIR_FA, o.AIR_FB, o.AIR_UA, o.AIR_UB, o.AIR_D_DF_FA, o.AIR_D_DF_FB,
-                        o.AIR_F_D_DFA, o.AIR_F_D_DFB, o.AIR_D_DB_BA, o.AIR_D_DB_BB, #15
-                        o.STAND_B, o.BACK_STEP, o.FORWARD_WALK, o.DASH, o.JUMP, o.FOR_JUMP,
-                        o.BACK_JUMP, o.STAND_GUARD, o.CROUCH_GUARD, o.THROW_A, o.THROW_B,
-                        o.STAND_A, o.STAND_D_DB_BA, o.CROUCH_A, o.CROUCH_B, o.STAND_FA,
-                        o.STAND_FB, o.CROUCH_FA, o.CROUCH_FB, o.STAND_D_DF_FA, o.STAND_D_DF_FB, 
-                        o.STAND_F_D_DFA, o.STAND_F_D_DFB, o.STAND_D_DB_BB, o.STAND_D_DF_FC] #
+        self.actions = [o.AIR_A, o.AIR_B, o.AIR_DB,
+                        o.AIR_FA, o.AIR_FB, o.AIR_UB, o.AIR_D_DF_FB,
+                        o.AIR_F_D_DFB, o.AIR_D_DB_BA, o.AIR_D_DB_BB, #10
+                        o.STAND_B, o.BACK_STEP, o.DASH, o.JUMP, o.FOR_JUMP,
+                        o.BACK_JUMP, o.STAND_GUARD, o.CROUCH_GUARD, o.THROW_B,
+                        o.STAND_D_DB_BA, o.CROUCH_A, o.CROUCH_B, o.STAND_FA,
+                        o.STAND_FB, o.CROUCH_FB, o.STAND_D_DF_FA, o.STAND_D_DF_FB, 
+                        o.STAND_F_D_DFA, o.STAND_F_D_DFB, o.STAND_D_DB_BB, o.STAND_D_DF_FC]
         self.frameskip = True
         self.QTablesFolder = QTablesFolder
         #NOTE: version file
@@ -212,11 +212,11 @@ class RLAI(object):
         logger.logging("getAvailableActions", 0)
         AvailableActions = []
         if self.myCharacter.getState() == self.gateway.jvm.enumerate.State.AIR:
-            for i in range(0, 15):
+            for i in range(0, 10):
                 if self.getActionEnergyCost(self.actions[i]) <= self.energy:
                     AvailableActions.append(self.actions[i])
         else:
-            for i in range(15, 40):
+            for i in range(10, 31):
                 if self.getActionEnergyCost(self.actions[i]) <= self.energy:
                     AvailableActions.append(self.actions[i])
 
