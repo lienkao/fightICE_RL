@@ -1,23 +1,26 @@
 import torch
 from torch import nn
 import numpy as np
+import torch.nn.functional as F
 class Net(nn.Module):
     def __init__(self, n_states, n_actions, n_hidden):
         super(Net, self).__init__()
 
         # 輸入層 (state) 到隱藏層，隱藏層到輸出層 (action)
         self.fc1 = nn.Linear(n_states, n_hidden)
+        self.fc1.weight.data.normal_(0, 0.1)
         self.out = nn.Linear(n_hidden, n_actions)
+        self.out.weight.data.normal_(0, 0.1)
 
     def forward(self, x):
         x = self.fc1(x)
-        x = nn.functions.relu(x) # ReLU activation
+        x = F.relu(x) # ReLU activation
         actions_value = self.out(x)
         return actions_value
 class DQN(object):
-    def __init__(self, n_states, n_actions, n_hidden, batch_size, lr, epsilon, gamma, target_replace_iter, memory_capacity):
+    def __init__(self, n_states, n_actions, n_hidden, batch_size, lr, epsilon, gamma, target_replace_iter, memory_capacity, version):
         self.eval_net, self.target_net = Net(n_states, n_actions, n_hidden), Net(n_states, n_actions, n_hidden)
- 
+        self.version = version
         self.memory = np.zeros((memory_capacity, n_states * 2 + 2)) # 每個 memory 中的 experience 大小為 (state + next state + reward + action)
         self.optimizer = torch.optim.Adam(self.eval_net.parameters(), lr=lr)
         self.loss_func = nn.MSELoss()
@@ -33,17 +36,34 @@ class DQN(object):
         self.gamma = gamma
         self.target_replace_iter = target_replace_iter
         self.memory_capacity = memory_capacity
+    def save_params(self):
+        # print(self.version)
+        torch.save(self.eval_net.state_dict(), './DRL/net/{}/eval_net_params.pkl'.format(self.version)) 
+        torch.save(self.target_net.state_dict(), './DRL/net/{}/target_net_params.pkl'.format(self.version))
+
+    def restore_params(self):
+        print(self.version)
+        try: 
+            # copy saved params to net
+            self.eval_net.load_state_dict(torch.load('./DRL/net/{}/eval_net_params.pkl'.format(self.version)))
+            self.target_net.load_state_dict(torch.load('./DRL/net/{}/target_net_params.pkl'.format(self.version)))
+        except:
+            print("New net")
+            torch.save(self.eval_net.state_dict(), './DRL/net/{}/eval_net_params.pkl'.format(self.version)) 
+            torch.save(self.target_net.state_dict(), './DRL/net/{}/target_net_params.pkl'.format(self.version))
 
     def choose_action(self, state):
         x = torch.unsqueeze(torch.FloatTensor(state), 0)
 
         # epsilon-greedy
         if np.random.uniform() < self.epsilon: # 隨機
+            # print("random choice")
             action = np.random.randint(0, self.n_actions)
         else: # 根據現有 policy 做最好的選擇
-            actions_value = self.eval_net(x) # 以現有 eval net 得出各個 action 的分數
-            action = torch.max(actions_value, 1)[1].data.numpy()[0] # 挑選最高分的 action
-
+            # print("policy choice")
+            actions_value = self.eval_net.forward(x) # 以現有 eval net 得出各個 action 的分數
+            action = int(torch.max(actions_value, 1)[1].data.numpy()[0]) # 挑選最高分的 action
+    
         return action
 
     def store_transition(self, state, action, reward, new_state):

@@ -28,7 +28,7 @@ def check_args(args):
             elif args[i+1] == "test":
                 TRAIN_MODE = False
         
-def start_game():
+def start_game(gateway, manager):
         print("version: {}, Train Mode: {}".format(VERSION, TRAIN_MODE))
         with open('rl_version.json', 'rb') as f:
             p = json.loads(f.read())
@@ -43,18 +43,18 @@ def start_game():
         p2 = eval(('AIs.' + OPPO_AI))(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)
-        print("Start game, number of game: {}".format(GAME_NUM))
+        
         game = manager.createGame("ZEN", "ZEN",
                                   p1.__class__.__name__,
                                   p2.__class__.__name__,
-                                  GAME_NUM)
+                                  1)
         start_time = time()
         manager.runGame(game)
         end_time = time()
         print("End game at {}, total time: {}".format(end_time, end_time - start_time))
         sys.stdout.flush()
 
-def close_gateway():
+def close_gateway(gateway):
     sleep(5)
     print("close_callback_sever")
     gateway.close_callback_server()
@@ -65,8 +65,13 @@ def close_gateway():
 
 def main_process(): 
     check_args(args)
-    start_game()
-    close_gateway()
+    print("Start game, number of game: {}".format(GAME_NUM))
+    for i in range(GAME_NUM):
+        gateway = JavaGateway(gateway_parameters=GatewayParameters(port=4242), callback_server_parameters=CallbackServerParameters())
+        manager = gateway.entry_point
+        start_game(gateway, manager)
+        close_gateway(gateway)
+        # sleep()
 
 args = sys.argv
 argc = len(args)
@@ -77,8 +82,7 @@ OPPO_AI = "Machete"
 EPSILON = 0.9
 LEARNING_RATE = 0.1
 FUTURE_RATE = 0.1
-gateway = JavaGateway(gateway_parameters=GatewayParameters(port=4242), callback_server_parameters=CallbackServerParameters())
-manager = gateway.entry_point
+
 
 main_process()
 
