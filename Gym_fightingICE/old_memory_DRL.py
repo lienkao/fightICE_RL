@@ -46,18 +46,19 @@ def main():
     discount_factor = 0.5              # reward discount factor
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 10800
-    n_episodes = 500
+    n_episodes = 100
     done_episodes = 0
-    data_amount = 500
-    data_version = 'v2.0'
+    data_amount = 100
+    data_version = 'v3.1'
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
     data_folder = f'./DRL/DRL_pkl/{data_version}/'
     for file in os.listdir(data_folder):
         with open(os.path.join(data_folder, file), 'rb+') as f:
             dqn.memory = pickle.load(f)
-            dqn.learn()
-            dqn.save_params()   
+            for i in range(2100):
+                dqn.learn()
+                dqn.save_params()   
 
     env.close()
     print('env close')

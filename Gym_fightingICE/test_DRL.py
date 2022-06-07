@@ -26,7 +26,7 @@ def check_args(args):
             PORT = int(args[i+1])
       
 def main():
-    env = gym.make("FightingiceDataNoFrameskip-v0", java_env_path="",port=PORT, freq_restart_java=10)
+    env = gym.make("FightingiceDataNoFrameskip-v0", java_env_path="",port=PORT, freq_restart_java=40)
     
     
 
@@ -43,7 +43,7 @@ def main():
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 10800
     n_episodes = 30
-    done_episodes = 0
+    done_episodes = 25
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
     for i_episode in range(done_episodes, n_episodes):
@@ -82,7 +82,7 @@ args = sys.argv
 argc = len(args)
 VERSION = 'v0.0'
 OPPO_AI = "Machete"
-PORT = 4242
+PORT = 4243
 if __name__ == "__main__":
     check_args(args)
     print(f"version: {VERSION}")
