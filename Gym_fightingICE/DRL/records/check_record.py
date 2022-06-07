@@ -52,15 +52,45 @@ def get_rewards():
 # for test
 def show_test():
     scores = []
-    with open(f"{VERSION}_test.txt", 'r') as f:
+    plt.figure()
+    plt.subplot(1, 3, 1)
+    with open("v3.0_test.txt", 'r') as f:
         t = f.read().split('\n')
         # print(t)
         for row in t:
             if row == '':continue
             cols = row.split()
             scores.append(int(cols[4]))
-    plt.title(f"version: {VERSION} test result")
+    plt.title("version: v3.0 test result")
     plt.hist(scores)
+    print("v3.0 test mean",np.mean(scores))
+    print("v3.0 test std",np.std(scores))
+    scores = []
+    plt.subplot(1, 3, 2)
+    with open("v3.1_one_train_test.txt", 'r') as f:
+        t = f.read().split('\n')
+        # print(t)
+        for row in t:
+            if row == '':continue
+            cols = row.split()
+            scores.append(int(cols[4]))
+    plt.title("version: v3.1 one train test result")
+    plt.hist(scores)
+    print("v3.1 one train test mean", np.mean(scores))
+    print("v3.1 one train test std", np.std(scores))
+    scores = []
+    plt.subplot(1, 3, 3)
+    with open("v3.1_test.txt", 'r') as f:
+        t = f.read().split('\n')
+        # print(t)
+        for row in t:
+            if row == '':continue
+            cols = row.split()
+            scores.append(int(cols[4]))
+    plt.title("v3.1 test result")
+    plt.hist(scores)
+    print("v3.1 test mean", np.mean(scores))
+    print("v3.1 test std", np.std(scores))
     plt.show()
     return scores
 def show_all_point(rewards):
@@ -92,8 +122,8 @@ POLY_N = 1
 if __name__ == "__main__":
     check_args(args)
     # fix_record_episodes()
-    # rewards = get_rewards()
+    rewards = get_rewards()
     show_test()
-    # poly(rewards)
+    poly(rewards)
 
     
