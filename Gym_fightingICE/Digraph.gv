@@ -1,0 +1,56 @@
+digraph {
+	graph [size="12,12"]
+	node [align=left fontname=monospace fontsize=10 height=0.2 ranksep=0.1 shape=box style=filled]
+	139966321422400 [label="
+ (1, 1)" fillcolor=darkolivegreen1]
+	139966321364944 [label="AddmmBackward0
+----------------------------
+alpha       :              1
+beta        :              1
+mat1        : [saved tensor]
+mat1_sizes  :        (1, 16)
+mat1_strides:        (16, 1)
+mat2        : [saved tensor]
+mat2_sizes  :        (16, 1)
+mat2_strides:        (1, 16)"]
+	139966321364128 -> 139966321364944
+	139967091760720 [label="W1.bias
+ (1)" fillcolor=lightblue]
+	139967091760720 -> 139966321364128
+	139966321364128 [label=AccumulateGrad]
+	139966321364560 -> 139966321364944
+	139966321364560 [label="TanhBackward0
+----------------------
+result: [saved tensor]"]
+	139966321363744 -> 139966321364560
+	139966321363744 [label="AddmmBackward0
+----------------------------
+alpha       :              1
+beta        :              1
+mat1        : [saved tensor]
+mat1_sizes  :         (1, 8)
+mat1_strides:             ()
+mat2        :           None
+mat2_sizes  :        (8, 16)
+mat2_strides:         (1, 8)"]
+	139966321364272 -> 139966321363744
+	139967091760800 [label="W0.bias
+ (16)" fillcolor=lightblue]
+	139967091760800 -> 139966321364272
+	139966321364272 [label=AccumulateGrad]
+	139966321426640 -> 139966321363744
+	139966321426640 [label=TBackward0]
+	139966321364320 -> 139966321426640
+	139967091703136 [label="W0.weight
+ (16, 8)" fillcolor=lightblue]
+	139967091703136 -> 139966321364320
+	139966321364320 [label=AccumulateGrad]
+	139966321364848 -> 139966321364944
+	139966321364848 [label=TBackward0]
+	139966321364368 -> 139966321364848
+	139966325279696 [label="W1.weight
+ (1, 16)" fillcolor=lightblue]
+	139966325279696 -> 139966321364368
+	139966321364368 [label=AccumulateGrad]
+	139966321364944 -> 139966321422400
+}

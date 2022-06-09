@@ -15,8 +15,8 @@ def check_args(args):
 
 def start_game():
         #p1 = TestAi(gateway)
-        p1 = MctsAi(gateway)
-        p2 = ForwardAI(gateway)
+        p1 = AIs.KickAI(gateway)
+        p2 = AIs.Machete-(gateway)
         manager.registerAI(p1.__class__.__name__, p1)
         manager.registerAI(p2.__class__.__name__, p2)
         print("Start game")

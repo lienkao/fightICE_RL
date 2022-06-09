@@ -6,15 +6,24 @@ class Net(nn.Module):
     def __init__(self, n_states, n_actions, n_hidden):
         super(Net, self).__init__()
 
-        # 輸入層 (state) 到隱藏層，隱藏層到輸出層 (action)
+        # input layer to hidden layer 1
         self.fc1 = nn.Linear(n_states, n_hidden)
         self.fc1.weight.data.normal_(0, 0.1)
+        # hidden layer 1 to hidden layer 2
+        self.fc2 = nn.Linear(n_hidden, n_hidden)
+        self.fc2.weight.data.normal_(0, 0.1)
+        # hidden layer 2 to output layer
         self.out = nn.Linear(n_hidden, n_actions)
         self.out.weight.data.normal_(0, 0.1)
+        print(self.fc1)
+        print(self.fc2)
+        print(self.out)
 
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x) # ReLU activation
+        x = self.fc2(x)
+        x = F.relu(x)
         actions_value = self.out(x)
         return actions_value
 class DQN(object):

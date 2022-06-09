@@ -1,4 +1,5 @@
 
+from tracemalloc import is_tracing
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -25,7 +26,7 @@ def check_args(args):
         #         TRAIN_MODE = True
         #     elif args[i+1] == "test":
         #         TRAIN_MODE = False
-def poly(rewards):
+def poly(rewards, is_tracking = False):
     episodes = [x for x in range(len(rewards))]
     # 
     # model=linear_model.LinearRegression()
@@ -38,7 +39,12 @@ def poly(rewards):
     plt.plot(episodes, regr.predict(np.reshape(episodes, (len(episodes), 1))), color='blue', linewidth=3)
     # plt.plot(X, regr.predict(X),color='blue',linewidth=1)
     # plt.plot(X,model.predict(X))
-    plt.show()
+    if is_tracking:
+        plt.draw()
+        plt.pause(0.5)
+        plt.clf()
+    else:
+        plt.show()
 def get_rewards():
     rewards = []
     with open(f"{VERSION}.txt", 'r') as f:
@@ -113,17 +119,21 @@ def fix_record_episodes():
                 exist.add(cols[1])
                 index += 1
                 w.write(' '.join(cols)+'\n')
-
+def keep_track_game():
+    while True:
+        rewards = get_rewards()
+        poly(rewards, is_tracking=True)
 args = sys.argv
 argc = len(args)
 VERSION = 'v0.0'
 POLY_N = 1
-        
-if __name__ == "__main__":
-    check_args(args)
-    # fix_record_episodes()
-    rewards = get_rewards()
-    show_test()
-    poly(rewards)
 
+
+if __name__ == "__main__":
+    
+    check_args(args)
+    # keep_track_ga
+    # me()
+    rewards = get_rewards()
+    poly(rewards)
     
