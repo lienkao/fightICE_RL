@@ -49,7 +49,15 @@ class GymAI(object):
         self.screenData = sd
 
     def getInformation(self, frameData, isControl):
-        self.pre_framedata = frameData if self.pre_framedata is None else self.frameData
+        if self.pre_framedata is None:
+            self.pre_framedata = frameData
+        else:
+            self.pre_framedata = self.frameData
+            try:
+                hp = self.pre_framedata.getCharacter(False).getHp()
+                print(hp)
+            except:
+                pass
         self.frameData = frameData
         self.isControl = isControl
         self.cc.setFrameData(self.frameData, self.player)
@@ -118,6 +126,7 @@ class GymAI(object):
                 p1_hp_pre = self.pre_framedata.getCharacter(True).getHp()
                 p2_hp_now = self.frameData.getCharacter(False).getHp()
                 p1_hp_now = self.frameData.getCharacter(True).getHp()
+                print(f"p2 now hp:{p2_hp_now}, p2 pre hp:{p2_hp_pre}")
                 if self.player:
                     reward = (p2_hp_pre-p2_hp_now) - (p1_hp_pre-p1_hp_now)
                 else:

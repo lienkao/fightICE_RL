@@ -32,7 +32,7 @@ def check_args(args):
         #         TRAIN_MODE = False
       
 def main():
-    env = gym.make("FightingiceDataNoFrameskip-v0", java_env_path="",port=4242, freq_restart_java=10)
+    env = gym.make("FightingiceDataFrameskip-v0", java_env_path="",port=4242, freq_restart_java=10)
     
     
 
@@ -47,12 +47,12 @@ def main():
     # print(n_actions)
     # Hyper parameters
     n_hidden = 50
-    batch_size = 1024
+    batch_size = 128
     learning_rate = 0.1                 # learning rate
     epsilon = 0.2            #  epsilon-greedy
     discount_factor = 0.5              # reward discount factor
     target_replace_iter = 100 # target network 更新間隔
-    memory_capacity = 10800
+    memory_capacity = 1024
     n_episodes = 500
     
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
@@ -72,7 +72,7 @@ def main():
             # action = random.randint(0, 55)
             action = dqn.choose_action(state)
             ori_state, reward, done, _ = env.step(action)
-            
+            print(reward)
             new_state = []
             for i in valid_states:
                 new_state.append(ori_state[i])
