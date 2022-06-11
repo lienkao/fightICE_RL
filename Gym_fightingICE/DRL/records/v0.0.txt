@@ -1,3 +1,6 @@
 episodes 497 finish, rewards: -859
 episodes 498 finish, rewards: -818
 episodes 499 finish, rewards: -744
+episodes 0 finish, rewards: 195
+episodes 1 finish, rewards: 0
+episodes 2 finish, rewards: 10

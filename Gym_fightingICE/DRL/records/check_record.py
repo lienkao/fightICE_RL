@@ -53,7 +53,10 @@ def get_rewards():
         for row in t:
             if row == '':continue
             cols = row.split()
-            rewards.append(int(cols[4]))
+            for i, col in enumerate(cols):
+                if 'reward' in col:
+                    rewards.append(int(cols[i+1]))
+            
     return rewards
 # for test
 def show_test():

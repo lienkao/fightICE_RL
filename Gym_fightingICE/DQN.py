@@ -88,6 +88,7 @@ class DQN(object):
         # 隨機取樣 batch_size 個 experience
         sample_index = np.random.choice(self.memory_capacity, self.batch_size)
         b_memory = self.memory[sample_index, :]
+        # A torch.Tensor is a multi-dimensional matrix containing elements of a single data type.
         b_state = torch.FloatTensor(b_memory[:, :self.n_states])
         b_action = torch.LongTensor(b_memory[:, self.n_states:self.n_states+1].astype(int))
         b_reward = torch.FloatTensor(b_memory[:, self.n_states+1:self.n_states+2])
