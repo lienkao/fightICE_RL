@@ -57,6 +57,8 @@ def main():
     
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
+    _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP"
+    action_strs = _actions.split(" ")
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
         # state = env.reset(p2=Machete)
