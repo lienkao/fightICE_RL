@@ -43,6 +43,8 @@ class GymAI(object):
         print("send round end to {}".format(self.pipe))
         self.pipe.send([self.obs, 0, True, None])
         self.just_inited = True
+        self.pre_1p_hp = 400
+        self.pre_2p_hp = 400
         # request = self.pipe.recv()
         # if request == "close":
         #     return
