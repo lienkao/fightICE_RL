@@ -10,6 +10,7 @@ from DQN import DQN
 from DQN import Net
 sys.path.append('gym-fightingice')
 from python.AIs.StandAI import StandAI
+from python.AIs.ForwardAI import ForwardAI
 def check_args(args):
     for i in range(argc):
         # if args[i] == "-n" or args[i] == "--n" or args[i] == "--number":
@@ -42,8 +43,6 @@ def main():
     # valid_states = [0, 1, 2, 3, 65, 66, 67, 68]
     
     n_states = env.observation_space.shape[0]
-    print(n_states)
-    # n_states = len(valid_states)
 
     # print(n_actions)
     # Hyper parameters
@@ -55,11 +54,15 @@ def main():
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 1024
     n_episodes = 500
-    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA BACK_STEP DASH".split()
+    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA DASH DASH".split()
+    _actions = "AIR AIR_A AIR_B AIR_D_DB_BA AIR_D_DB_BB AIR_D_DF_FA AIR_D_DF_FB AIR_DA".split()
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
+    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA BACK_STEP DASH".split()
+    action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
+        # state = env.reset(p2=Machete)
         state = env.reset(p2=StandAI)
         print("reset")
         cnt = 0
@@ -71,6 +74,9 @@ def main():
             print(f"action: {_actions[action]}")
             new_state, reward, done, _ = env.step(action)
             rewards += reward
+            if reward == 0:
+                reward -= action_hit_damage[action]
+            print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
             dqn.store_transition(state, action, reward, new_state)
             if dqn.memory_counter > memory_capacity:
@@ -92,7 +98,7 @@ def main():
         with open('./DRL/DRL_pkl/{}/net_{}.pkl'.format(VERSION, i_episode), 'wb+') as f:
             pickle.dump(dqn.eval_net, f)  
         dqn.save_params()
-        print(list(dqn.eval_net.parameters()))   
+        print(list(dqn.eval_net.parameters()))
 
     env.close()
     print('env close')
