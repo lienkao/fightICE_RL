@@ -56,7 +56,7 @@ def main():
     n_episodes = 500
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
-    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA BACK_STEP DASH".split()
+    _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
     action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
