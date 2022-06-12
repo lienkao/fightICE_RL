@@ -43,8 +43,6 @@ def main():
     # valid_states = [0, 1, 2, 3, 65, 66, 67, 68]
     
     n_states = env.observation_space.shape[0]
-    print(n_states)
-    # n_states = len(valid_states)
 
     # print(n_actions)
     # Hyper parameters
@@ -60,9 +58,12 @@ def main():
     _actions = "AIR AIR_A AIR_B AIR_D_DB_BA AIR_D_DB_BB AIR_D_DF_FA AIR_D_DF_FB AIR_DA".split()
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
+    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA BACK_STEP DASH".split()
+    action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
-        state = env.reset(p2=ForwardAI)
+        # state = env.reset(p2=Machete)
+        state = env.reset(p2=StandAI)
         print("reset")
         cnt = 0
         steps = 0
@@ -70,10 +71,12 @@ def main():
         while True:
             # action = random.randint(0, 55)
             action = dqn.choose_action(state)
+            print(f"action: {_actions[action]}")
             new_state, reward, done, _ = env.step(action)
             rewards += reward
-            print(f"action: {_actions[action]},  reward: {reward}")
-        
+            if reward == 0:
+                reward -= action_hit_damage[action]
+            print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
             dqn.store_transition(state, action, reward, new_state)
             if dqn.memory_counter > memory_capacity:
@@ -84,7 +87,7 @@ def main():
                 with open('./DRL/records/{}.txt'.format(VERSION), 'a+') as f:
                     f.write("episodes {} round {} finish, rewards: {} steps: {}\n".format(i_episode, cnt, rewards, steps))
                 if cnt == 3:break
-                state = env.reset(p2=ForwardAI)
+                state = env.reset(p2=StandAI)
                 rewards = 0
                 print("reset")
                 done = False
@@ -95,7 +98,7 @@ def main():
         with open('./DRL/DRL_pkl/{}/net_{}.pkl'.format(VERSION, i_episode), 'wb+') as f:
             pickle.dump(dqn.eval_net, f)  
         dqn.save_params()
-        print(list(dqn.eval_net.parameters()))   
+        print(list(dqn.eval_net.parameters()))
 
     env.close()
     print('env close')

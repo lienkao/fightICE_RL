@@ -13,13 +13,13 @@ class GymAI(object):
 
         self.obs = None
         self.just_inited = True
-
-        # self._actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA DASH DASH"
-        self._actions = "AIR AIR_A AIR_B AIR_D_DB_BA AIR_D_DB_BB AIR_D_DF_FA AIR_D_DF_FB AIR_DA"
+        self._actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP"
         # self._actions = "AIR AIR_A AIR_B AIR_D_DB_BA AIR_D_DB_BB AIR_D_DF_FA AIR_D_DF_FB AIR_DA AIR_DB AIR_F_D_DFA AIR_F_D_DFB AIR_FA AIR_FB AIR_GUARD AIR_GUARD_RECOV AIR_RECOV AIR_UA AIR_UB BACK_JUMP BACK_STEP CHANGE_DOWN CROUCH CROUCH_A CROUCH_B CROUCH_FA CROUCH_FB CROUCH_GUARD CROUCH_GUARD_RECOV CROUCH_RECOV DASH DOWN FOR_JUMP FORWARD_WALK JUMP LANDING NEUTRAL RISE STAND STAND_A STAND_B STAND_D_DB_BA STAND_D_DB_BB STAND_D_DF_FA STAND_D_DF_FB STAND_D_DF_FC STAND_F_D_DFA STAND_F_D_DFB STAND_FA STAND_FB STAND_GUARD STAND_GUARD_RECOV STAND_RECOV THROW_A THROW_B THROW_HIT THROW_SUFFER"
         self.action_strs = self._actions.split(" ")
 
         self.pre_framedata = None
+        self.pre_1p_hp = 400
+        self.pre_2p_hp = 400
 
         self.frameskip = frameskip
 
@@ -116,15 +116,16 @@ class GymAI(object):
             if self.pre_framedata.getEmptyFlag() or self.frameData.getEmptyFlag():
                 reward = 0
             else:
-                p2_hp_pre = self.pre_framedata.getCharacter(False).getHp()
-                p1_hp_pre = self.pre_framedata.getCharacter(True).getHp()
                 p2_hp_now = self.frameData.getCharacter(False).getHp()
                 p1_hp_now = self.frameData.getCharacter(True).getHp()
                 if self.player:
-                    reward = (p2_hp_pre-p2_hp_now) - (p1_hp_pre-p1_hp_now)
-                    print(p2_hp_pre, p2_hp_now, p1_hp_pre, p1_hp_now)
+                    reward = (self.pre_2p_hp-p2_hp_now) - (self.pre_1p_hp-p1_hp_now)
                 else:
-                    reward = (p1_hp_pre-p1_hp_now) - (p2_hp_pre-p2_hp_now)
+                    reward = (self.pre_1p_hp-p1_hp_now) - (self.pre_2p_hp-p2_hp_now)
+                
+                self.pre_1p_hp = p1_hp_now
+                self.pre_2p_hp = p2_hp_now
+                print(f"reward: {reward}")
         except:
             reward = 0
         return reward
@@ -138,23 +139,23 @@ class GymAI(object):
         myEnergy = my.getEnergy() / 300
         myX = ((my.getLeft() + my.getRight()) / 2) / 960
         myY = ((my.getBottom() + my.getTop()) / 2) / 640
-        mySpeedX = my.getSpeedX() / 15
-        mySpeedY = my.getSpeedY() / 28
-        myState = my.getAction().ordinal()
-        myRemainingFrame = my.getRemainingFrame() / 70
+        # mySpeedX = my.getSpeedX() / 15
+        # mySpeedY = my.getSpeedY() / 28
+        # myState = my.getAction().ordinal()
+        # myRemainingFrame = my.getRemainingFrame() / 70
 
         # opp information
         oppHp = abs(opp.getHp() / 400)
         oppEnergy = opp.getEnergy() / 300
         oppX = ((opp.getLeft() + opp.getRight()) / 2) / 960
         oppY = ((opp.getBottom() + opp.getTop()) / 2) / 640
-        oppSpeedX = opp.getSpeedX() / 15
-        oppSpeedY = opp.getSpeedY() / 28
-        oppState = opp.getAction().ordinal()
-        oppRemainingFrame = opp.getRemainingFrame() / 70
+        # oppSpeedX = opp.getSpeedX() / 15
+        # oppSpeedY = opp.getSpeedY() / 28
+        # oppState = opp.getAction().ordinal()
+        # oppRemainingFrame = opp.getRemainingFrame() / 70
 
         # time information
-        game_frame_num = self.frameData.getFramesNumber() / 3600
+        # game_frame_num = self.frameData.getFramesNumber() / 3600
 
         observation = []
 
