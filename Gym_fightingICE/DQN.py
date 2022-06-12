@@ -88,6 +88,7 @@ class DQN(object):
         # 隨機取樣 batch_size 個 experience
         sample_index = np.random.choice(self.memory_capacity, self.batch_size)
         b_memory = self.memory[sample_index, :]
+        # A torch.Tensor is a multi-dimensional matrix containing elements of a single data type.
         b_state = torch.FloatTensor(b_memory[:, :self.n_states])
         b_action = torch.LongTensor(b_memory[:, self.n_states:self.n_states+1].astype(int))
         b_reward = torch.FloatTensor(b_memory[:, self.n_states+1:self.n_states+2])
@@ -99,7 +100,7 @@ class DQN(object):
         q_target = b_reward + self.gamma * q_next.max(1)[0].view(self.batch_size, 1) # 計算這些 experience 當下 target net 所得出的 Q value
         loss = self.loss_func(q_eval, q_target)
 
-        # Backpropagation
+        # 誤差反向傳播
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()

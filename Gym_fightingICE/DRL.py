@@ -8,8 +8,9 @@ import torch
 from torch import nn
 from DQN import DQN
 from DQN import Net
-sys.path.append('gym-figghtingice')
+sys.path.append('gym-fightingice')
 from python.AIs.StandAI import StandAI
+from python.AIs.ForwardAI import ForwardAI
 def check_args(args):
     for i in range(argc):
         # if args[i] == "-n" or args[i] == "--n" or args[i] == "--number":
@@ -53,7 +54,8 @@ def main():
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 1024
     n_episodes = 500
-    
+    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA DASH DASH".split()
+    _actions = "AIR AIR_A AIR_B AIR_D_DB_BA AIR_D_DB_BB AIR_D_DF_FA AIR_D_DF_FB AIR_DA".split()
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
     _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA BACK_STEP DASH".split()
