@@ -33,6 +33,8 @@ class GymAI(object):
 
         self.player = player
         self.gameData = gameData
+        self.pre_1p_hp = 400
+        self.pre_2p_hp = 400
 
         return 0
 

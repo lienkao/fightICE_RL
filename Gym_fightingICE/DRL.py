@@ -71,9 +71,9 @@ def main():
             action = dqn.choose_action(state)
             print(f"action: {_actions[action]}")
             new_state, reward, done, _ = env.step(action)
-            rewards += reward
             if reward == 0:
                 reward -= action_hit_damage[action]
+            rewards += reward
             print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
             dqn.store_transition(state, action, reward, new_state)
