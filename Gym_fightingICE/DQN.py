@@ -100,7 +100,7 @@ class DQN(object):
         q_target = b_reward + self.gamma * q_next.max(1)[0].view(self.batch_size, 1) # 計算這些 experience 當下 target net 所得出的 Q value
         loss = self.loss_func(q_eval, q_target)
 
-        # Backpropagation
+        # 誤差反向傳播
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()

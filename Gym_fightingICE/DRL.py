@@ -10,6 +10,7 @@ from DQN import DQN
 from DQN import Net
 sys.path.append('gym-fightingice')
 from python.AIs.StandAI import StandAI
+from python.AIs.ForwardAI import ForwardAI
 def check_args(args):
     for i in range(argc):
         # if args[i] == "-n" or args[i] == "--n" or args[i] == "--number":
@@ -55,12 +56,13 @@ def main():
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 1024
     n_episodes = 500
-    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA BACK_STEP DASH".split()
+    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA DASH DASH".split()
+    _actions = "AIR AIR_A AIR_B AIR_D_DB_BA AIR_D_DB_BB AIR_D_DF_FA AIR_D_DF_FB AIR_DA".split()
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
-        state = env.reset(p2=StandAI)
+        state = env.reset(p2=ForwardAI)
         print("reset")
         cnt = 0
         steps = 0
@@ -68,9 +70,10 @@ def main():
         while True:
             # action = random.randint(0, 55)
             action = dqn.choose_action(state)
-            print(f"action: {_actions[action]}")
             new_state, reward, done, _ = env.step(action)
             rewards += reward
+            print(f"action: {_actions[action]},  reward: {reward}")
+        
             steps += 1
             dqn.store_transition(state, action, reward, new_state)
             if dqn.memory_counter > memory_capacity:
@@ -81,7 +84,7 @@ def main():
                 with open('./DRL/records/{}.txt'.format(VERSION), 'a+') as f:
                     f.write("episodes {} round {} finish, rewards: {} steps: {}\n".format(i_episode, cnt, rewards, steps))
                 if cnt == 3:break
-                state = env.reset(p2=StandAI)
+                state = env.reset(p2=ForwardAI)
                 rewards = 0
                 print("reset")
                 done = False
