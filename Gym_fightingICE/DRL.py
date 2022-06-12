@@ -39,10 +39,9 @@ def main():
     # # Environment parameters
     n_actions = env.action_space.n
     # my hp energy x y, opp hp energy x y 
-    valid_states = [0, 1, 2, 3, 65, 66, 67, 68]
+    # valid_states = [0, 1, 2, 3, 65, 66, 67, 68]
     
-    # n_states = env.observation_space.shape[0]
-    n_states = len(valid_states)
+    n_states = env.observation_space.shape[0]
 
     # print(n_actions)
     # Hyper parameters
@@ -57,15 +56,12 @@ def main():
     
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
-    _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP"
-    action_strs = _actions.split(" ")
+    _actions = "STAND_B STAND_D_DB_BB AIR_B CROUCH_B CROUCH_FB CROUCH_FA BACK_STEP DASH".split()
+    action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
         # state = env.reset(p2=Machete)
-        ori_state = env.reset(p2=StandAI)
-        state = []
-        for i in valid_states:
-            state.append(ori_state[i])
+        state = env.reset(p2=StandAI)
         print("reset")
         cnt = 0
         steps = 0
@@ -73,28 +69,24 @@ def main():
         while True:
             # action = random.randint(0, 55)
             action = dqn.choose_action(state)
-            ori_state, reward, done, _ = env.step(action)
-            print(reward)
-            new_state = []
-            for i in valid_states:
-                new_state.append(ori_state[i])
-            # print(new_state)
+            print(f"action: {_actions[action]}")
+            new_state, reward, done, _ = env.step(action)
             rewards += reward
-            if reward != 0:
-                print("reward: {}, rewards: {}".format(reward, rewards))
+            if reward == 0:
+                reward -= action_hit_damage[action]
+            print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
             dqn.store_transition(state, action, reward, new_state)
             if dqn.memory_counter > memory_capacity:
                 # print("learn()")
                 dqn.learn()
             if done:
-                print('steps:',steps)
                 cnt += 1	
+                with open('./DRL/records/{}.txt'.format(VERSION), 'a+') as f:
+                    f.write("episodes {} round {} finish, rewards: {} steps: {}\n".format(i_episode, cnt, rewards, steps))
                 if cnt == 3:break
-                ori_state = env.reset(p2=StandAI)
-                state = []
-                for i in valid_states:
-                    state.append(ori_state[i])
+                state = env.reset(p2=StandAI)
+                rewards = 0
                 print("reset")
                 done = False
                 steps = 0
@@ -104,9 +96,7 @@ def main():
         with open('./DRL/DRL_pkl/{}/net_{}.pkl'.format(VERSION, i_episode), 'wb+') as f:
             pickle.dump(dqn.eval_net, f)  
         dqn.save_params()
-        print(list(dqn.eval_net.parameters()))   
-        with open('./DRL/records/{}.txt'.format(VERSION), 'a+') as f:
-            f.write("episodes {} finish, rewards: {}\n".format(i_episode, rewards))
+        print(list(dqn.eval_net.parameters()))
 
     env.close()
     print('env close')
