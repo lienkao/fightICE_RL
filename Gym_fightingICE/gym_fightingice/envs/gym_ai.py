@@ -18,6 +18,8 @@ class GymAI(object):
         self.action_strs = self._actions.split(" ")
 
         self.pre_framedata = None
+        self.pre_1p_hp = 400
+        self.pre_2p_hp = 400
 
         self.frameskip = frameskip
 
@@ -49,15 +51,7 @@ class GymAI(object):
         self.screenData = sd
 
     def getInformation(self, frameData, isControl):
-        if self.pre_framedata is None:
-            self.pre_framedata = frameData
-        else:
-            self.pre_framedata = self.frameData
-            try:
-                hp = self.pre_framedata.getCharacter(False).getHp()
-                print(hp)
-            except:
-                pass
+        self.pre_framedata = frameData if self.pre_framedata is None else self.frameData
         self.frameData = frameData
         self.isControl = isControl
         self.cc.setFrameData(self.frameData, self.player)
@@ -122,15 +116,16 @@ class GymAI(object):
             if self.pre_framedata.getEmptyFlag() or self.frameData.getEmptyFlag():
                 reward = 0
             else:
-                p2_hp_pre = self.pre_framedata.getCharacter(False).getHp()
-                p1_hp_pre = self.pre_framedata.getCharacter(True).getHp()
                 p2_hp_now = self.frameData.getCharacter(False).getHp()
                 p1_hp_now = self.frameData.getCharacter(True).getHp()
-                print(f"p2 now hp:{p2_hp_now}, p2 pre hp:{p2_hp_pre}")
                 if self.player:
-                    reward = (p2_hp_pre-p2_hp_now) - (p1_hp_pre-p1_hp_now)
+                    reward = (self.pre_2p_hp-p2_hp_now) - (self.pre_1p_hp-p1_hp_now)
                 else:
-                    reward = (p1_hp_pre-p1_hp_now) - (p2_hp_pre-p2_hp_now)
+                    reward = (self.pre_1p_hp-p1_hp_now) - (self.pre_2p_hp-p2_hp_now)
+                
+                self.pre_1p_hp = p1_hp_now
+                self.pre_2p_hp = p2_hp_now
+                print(f"reward: {reward}")
         except:
             reward = 0
         return reward
