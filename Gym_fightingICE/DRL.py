@@ -58,8 +58,9 @@ def main():
     n_episodes = 150
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
-    _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
-    action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
+    # _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
+    _actions = ['FOR_JUMP _B B B', 'FOR_JUMP', 'STAND_D_DF_FC', 'STAND_D_DB_BB', 'STAND_F_D_DFA', '6 6 6', 'B', 'AIR_DB']
+    action_hit_damage = [20, 0, 120, 25, 10, 20, 10, 10]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
         state = env.reset(p2=Machete)
