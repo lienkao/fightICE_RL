@@ -55,7 +55,20 @@ def get_rewards():
             cols = row.split()
             for i, col in enumerate(cols):
                 if 'reward' in col:
-                    rewards.append(int(cols[i+1]))
+                    rewards.append(float(cols[i+1]))
+            
+    return rewards
+def get_steps():
+    rewards = []
+    with open(f"{VERSION}.txt", 'r') as f:
+        t = f.read().split('\n')
+        # print(t)
+        for row in t:
+            if row == '':continue
+            cols = row.split()
+            for i, col in enumerate(cols):
+                if 'steps' in col:
+                    rewards.append(float(cols[i+1]))
             
     return rewards
 # for test
@@ -139,4 +152,6 @@ if __name__ == "__main__":
     # me()
     rewards = get_rewards()
     poly(rewards)
+    steps = get_steps()
+    poly(steps)
     

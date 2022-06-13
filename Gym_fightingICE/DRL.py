@@ -11,6 +11,8 @@ from DQN import Net
 sys.path.append('gym-fightingice')
 from python.AIs.StandAI import StandAI
 from python.AIs.ForwardAI import ForwardAI
+from python.AIs.machete import Machete
+
 def check_args(args):
     for i in range(argc):
         # if args[i] == "-n" or args[i] == "--n" or args[i] == "--number":
@@ -53,15 +55,15 @@ def main():
     discount_factor = 0.5              # reward discount factor
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 1024
-    n_episodes = 500
+    n_episodes = 150
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
     _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
     action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
-        # state = env.reset(p2=Machete)
-        state = env.reset(p2=StandAI)
+        state = env.reset(p2=Machete)
+        # state = env.reset(p2=ForwardAI)
         print("reset")
         cnt = 0
         steps = 0
@@ -72,7 +74,7 @@ def main():
             print(f"action: {_actions[action]}")
             new_state, reward, done, _ = env.step(action)
             if reward == 0:
-                reward -= action_hit_damage[action]
+                reward -= action_hit_damage[action] / 10
             rewards += reward
             print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
@@ -85,7 +87,7 @@ def main():
                 with open('./DRL/records/{}.txt'.format(VERSION), 'a+') as f:
                     f.write("episodes {} round {} finish, rewards: {} steps: {}\n".format(i_episode, cnt, rewards, steps))
                 if cnt == 3:break
-                state = env.reset(p2=StandAI)
+                state = env.reset(p2=Machete)
                 rewards = 0
                 print("reset")
                 done = False

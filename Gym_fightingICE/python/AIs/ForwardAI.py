@@ -50,10 +50,13 @@ class ForwardAI(object):
             
         self.inputKey.empty()
         self.cc.skillCancel()     
-
-        # Just spam kick
-        self.cc.commandCall("FORWARD_WALK")
-                        
+        distance = self.frameData.getDistanceX()
+       
+        if distance > 150:
+            self.cc.commandCall("FORWARD_WALK")
+        elif distance > 100:
+            # Perform a quick dash to get closer
+            self.cc.commandCall("6 6 6")             
     # This part is mandatory
     class Java:
         implements = ["aiinterface.AIInterface"]

@@ -1,4 +1,4 @@
-import imp
+
 import sys
 import os
 # add AI path to sys.path
