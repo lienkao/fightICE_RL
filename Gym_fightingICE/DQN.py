@@ -12,17 +12,23 @@ class Net(nn.Module):
         # hidden layer 1 to hidden layer 2
         self.fc2 = nn.Linear(n_hidden, n_hidden)
         self.fc2.weight.data.normal_(0, 0.1)
-        # hidden layer 2 to output layer
+        # hidden layer 2 to hidden layer 3
+        self.fc3 = nn.Linear(n_hidden, n_hidden)
+        self.fc3.weight.data.normal_(0, 0.1)
+        # hidden layer 3 to output layer
         self.out = nn.Linear(n_hidden, n_actions)
         self.out.weight.data.normal_(0, 0.1)
         print(self.fc1)
         print(self.fc2)
+        print(self.fc3)
         print(self.out)
 
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x) # ReLU activation
         x = self.fc2(x)
+        x = F.relu(x)
+        x = self.fc3(x)
         x = F.relu(x)
         actions_value = self.out(x)
         return actions_value

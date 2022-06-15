@@ -22,6 +22,7 @@ for row in data:
 
 p2hp = []
 p1hp = []
+minus = []
 cnt = 0
 x = np.arange(len(data))
 for row in data:
@@ -36,9 +37,10 @@ for row in data:
     else:
         p1hp.append(0)
         p2hp.append(-int(row[2]))
+    minus.append(p1 - p2)
 
-plt.bar(x, p1hp)
-plt.bar(x, p2hp)
+plt.bar(x, p1hp, width = 1)
+plt.bar(x, p2hp, width = 1)
 plt.show()
 '''
 with open('tcc.csv', 'w') as outfile:
