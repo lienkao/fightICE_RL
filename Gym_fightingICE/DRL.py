@@ -35,7 +35,7 @@ def check_args(args):
         #         TRAIN_MODE = False
       
 def main():
-    env = gym.make("FightingiceDataFrameskip-v0", java_env_path="",port=4242, freq_restart_java=10)
+    env = gym.make("FightingiceDataFrameskip-v0", java_env_path="",port=4242, freq_restart_java=500)
     
     
 
@@ -48,18 +48,19 @@ def main():
 
     # print(n_actions)
     # Hyper parameters
-    n_hidden = 50
+    n_hidden = 256
     batch_size = 128
     learning_rate = 0.1                 # learning rate
     epsilon = 0.2            #  epsilon-greedy
     discount_factor = 0.5              # reward discount factor
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 1024
-    n_episodes = 150
+    n_episodes = 300
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
-    _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
-    action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
+    # _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
+    _actions = ['FOR_JUMP _B B B', 'FOR_JUMP', 'STAND_D_DF_FC', 'STAND_D_DB_BB', 'STAND_F_D_DFA', '6 6 6', 'B', 'AIR_DB']
+    action_hit_damage = [20, 0, 120, 25, 10, 0, 10, 10]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
         state = env.reset(p2=Machete)
@@ -107,7 +108,7 @@ args = sys.argv
 argc = len(args)
 VERSION = 'v0.0'
 OPPO_AI = "Machete"
-DONE_EPISODES = 0
+DONE_EPISODES = 173
 if __name__ == "__main__":
     check_args(args)
     print(f"version: {VERSION}")

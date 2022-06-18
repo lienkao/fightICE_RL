@@ -152,6 +152,6 @@ if __name__ == "__main__":
     # me()
     rewards = get_rewards()
     poly(rewards)
-    steps = get_steps()
-    poly(steps)
+    # steps = get_steps()
+    # poly(steps)
     
