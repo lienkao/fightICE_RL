@@ -26,7 +26,7 @@ def check_args(args):
         #         TRAIN_MODE = True
         #     elif args[i+1] == "test":
         #         TRAIN_MODE = False
-def poly(rewards, is_tracking = False):
+def poly(rewards, type, is_tracking = False):
     episodes = [x for x in range(len(rewards))]
     # 
     # model=linear_model.LinearRegression()
@@ -34,7 +34,7 @@ def poly(rewards, is_tracking = False):
     regr=make_pipeline(PolynomialFeatures(POLY_N),linear_model.LinearRegression())
     regr.fit(np.reshape(episodes, (len(episodes), 1)), np.reshape(rewards, (len(rewards), 1)))
 
-    plt.title(f"version: {VERSION}")
+    plt.title(f"version: {VERSION} {type}")
     plt.scatter(episodes,rewards)
     plt.plot(episodes, regr.predict(np.reshape(episodes, (len(episodes), 1))), color='blue', linewidth=3)
     # plt.plot(X, regr.predict(X),color='blue',linewidth=1)
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     # keep_track_ga
     # me()
     rewards = get_rewards()
-    poly(rewards)
+    poly(rewards[:450], 'rewards')
     steps = get_steps()
-    poly(steps)
+    poly(steps[:450], 'steps')
     

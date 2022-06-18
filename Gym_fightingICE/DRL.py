@@ -57,12 +57,13 @@ def main():
     memory_capacity = 1024
     n_episodes = 150
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
-    dqn.restore_params()
-    _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
+    dqn.restore_params() 
+    _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB BACK_STEP ".split()
+    _actions.append('DASH')
     action_hit_damage = [10, 25, 10, 10, 12, 8, 0, 0]
     state_freq = [0]*n_states
     for i_episode in range(DONE_EPISODES, n_episodes):
-        state = env.reset(p2=Machete)
+        state = env.reset(p2=StandAI)
         # state = env.reset(p2=ForwardAI)
         print("reset")
         cnt = 0
@@ -87,7 +88,7 @@ def main():
                 with open('./DRL/records/{}.txt'.format(VERSION), 'a+') as f:
                     f.write("episodes {} round {} finish, rewards: {} steps: {}\n".format(i_episode, cnt, rewards, steps))
                 if cnt == 3:break
-                state = env.reset(p2=Machete)
+                state = env.reset(p2=StandAI)
                 rewards = 0
                 print("reset")
                 done = False
