@@ -90,7 +90,7 @@ def main():
             rewards += reward
             print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
-            if np.random.random_sample() <= np.log2(reward*2+10)+0.5:
+            if np.random.random_sample() <= np.log2(abs(reward)*2+10)+0.5:
                 dqn.store_transition(state, action, reward, new_state)
             if dqn.memory_counter > memory_capacity:
                 # print("learn()")
