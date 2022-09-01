@@ -4,3 +4,26 @@ episodes 499 finish, rewards: -744
 episodes 0 finish, rewards: 195
 episodes 1 finish, rewards: 0
 episodes 2 finish, rewards: 10
+episodes 301 round 1 finish, rewards: -215.0 steps: 51
+episodes 301 round 2 finish, rewards: -161.7 steps: 97
+episodes 301 round 3 finish, rewards: -282.0 steps: 46
+episodes 1974 round 1 finish, rewards: -97.6 steps: 148
+episodes 1974 round 2 finish, rewards: -244.10000000000002 steps: 153
+episodes 1974 round 3 finish, rewards: -274.7 steps: 153
+episodes 1975 round 1 finish, rewards: -344.5 steps: 113
+episodes 1975 round 2 finish, rewards: -176.8 steps: 60
+episodes 1975 round 3 finish, rewards: -297.0 steps: 118
+episodes 1976 round 1 finish, rewards: -198.8 steps: 75
+episodes 1976 round 2 finish, rewards: -166.5 steps: 104
+episodes 1976 round 3 finish, rewards: -275.3 steps: 50
+episodes 1977 round 1 finish, rewards: -201.60000000000002 steps: 79
+episodes 1977 round 2 finish, rewards: -183.5 steps: 63
+episodes 1977 round 3 finish, rewards: -331.5 steps: 63
+episodes 1978 round 1 finish, rewards: -284.8 steps: 70
+episodes 1978 round 2 finish, rewards: -203.5 steps: 68
+episodes 1978 round 3 finish, rewards: -338.0 steps: 71
+episodes 1979 round 1 finish, rewards: -305.8 steps: 81
+episodes 1979 round 2 finish, rewards: -346.5 steps: 148
+episodes 1979 round 3 finish, rewards: -352.5 steps: 106
+episodes 1980 round 1 finish, rewards: -252.80000000000007 steps: 103
+episodes 1980 round 2 finish, rewards: -435.3 steps: 176

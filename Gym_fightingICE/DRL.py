@@ -12,7 +12,7 @@ sys.path.append('gym-fightingice')
 from python.AIs.StandAI import StandAI
 from python.AIs.ForwardAI import ForwardAI
 from python.AIs.machete import Machete
-
+from time import sleep
 def check_args(args):
     for i in range(argc):
         # if args[i] == "-n" or args[i] == "--n" or args[i] == "--number":
@@ -55,7 +55,9 @@ def main():
     discount_factor = 0.5              # reward discount factor
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 1024
-    n_episodes = 300
+    n_episodes = 2000
+    i_episode = 0
+    
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
     dqn.restore_params()
     # _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
@@ -65,8 +67,13 @@ def main():
     _actions = "AIR_A AIR_B AIR_D_DB_BA AIR_D_DB_BB AIR_D_DF_FA AIR_D_DF_FB AIR_DA AIR_DB AIR_F_D_DFA AIR_F_D_DFB AIR_FA AIR_FB AIR_GUARD AIR_UA AIR_UB BACK_JUMP BACK_STEP CROUCH_A CROUCH_B CROUCH_FA CROUCH_FB CROUCH_GUARD DASH FOR_JUMP FORWARD_WALK JUMP STAND_A STAND_B STAND_D_DB_BA STAND_D_DB_BB STAND_D_DF_FA STAND_D_DF_FB STAND_D_DF_FC STAND_F_D_DFA STAND_F_D_DFB STAND_FA STAND_FB STAND_GUARD THROW_A THROW_B NEUTRAL AIR".split()
     
     action_hit_damage = [8, 10, 15, 40, 10, 30, 8, 10, 10, 40, 10, 12, 0, 10, 20, 0, 0, 5, 10, 8, 12, 0, 0, 0, 0, 0, 5, 10, 10, 25, 10, 30, 120, 10, 40, 8, 12, 0, 10, 20, 0, 0]
-    state_freq = [0]*n_states
+    # state_freq = [0]*n_states
+    train_done = False
+    start_training = False
+    buffer = []
     for i_episode in range(DONE_EPISODES, n_episodes):
+    # while not train_done:
+        # i_episode += 1
         state = env.reset(p2=Machete)
         # state = env.reset(p2=ForwardAI)
         print("reset")
@@ -83,14 +90,25 @@ def main():
             rewards += reward
             print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
-            dqn.store_transition(state, action, reward, new_state)
+            if np.random.random_sample() <= np.log2(reward*2+10)+0.5:
+                dqn.store_transition(state, action, reward, new_state)
             if dqn.memory_counter > memory_capacity:
                 # print("learn()")
                 dqn.learn()
+                start_training = True
             if done:
                 cnt += 1	
                 with open('./DRL/records/{}.txt'.format(VERSION), 'a+') as f:
                     f.write("episodes {} round {} finish, rewards: {} steps: {}\n".format(i_episode, cnt, rewards, steps))
+                
+                if start_training:
+                    buffer.append(rewards)
+                    if len(buffer) > 30:
+                        buffer.pop(0)
+                        sigma = np.std(buffer)
+                        if sigma < 10:
+                            print(f"Standard Deviation :{sigma}")
+                            train_done = True
                 if cnt == 3:break
                 state = env.reset(p2=Machete)
                 rewards = 0
@@ -103,16 +121,17 @@ def main():
         with open('./DRL/DRL_pkl/{}/net_{}.pkl'.format(VERSION, i_episode), 'wb+') as f:
             pickle.dump(dqn.eval_net, f)  
         dqn.save_params()
-        print(list(dqn.eval_net.parameters()))
+        # print(list(dqn.eval_net.parameters()))
 
     env.close()
+    sleep(5)
     print('env close')
 
 args = sys.argv
 argc = len(args)
 VERSION = 'v0.0'
 OPPO_AI = "Machete"
-DONE_EPISODES = 173
+DONE_EPISODES = 0
 if __name__ == "__main__":
     check_args(args)
     print(f"version: {VERSION}")

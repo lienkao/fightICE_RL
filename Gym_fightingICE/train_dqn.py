@@ -21,18 +21,21 @@ def main():
     n_states = env.observation_space.shape[0]
 
     # Hyper parameters
-    n_hidden = 50
+    n_hidden = 256
     batch_size = 32
     lr = 0.1                 # learning rate
     epsilon = 0.9            #  epsilon-greedy
     gamma = 0.5              # reward discount factor
     target_replace_iter = 100 # target network 更新間隔
-    memory_capacity = 10800
-    n_episodes = 300
+    memory_capacity = 108000
+    n_episodes = 0
+    i_episode = 0
 
     dqn = DQN(n_states, n_actions, n_hidden, batch_size, lr, epsilon, gamma, target_replace_iter, memory_capacity)
 
-    for i_episode in range(n_episodes):
+    # for i_episode in range(n_episodes):
+    while True:
+        i_episode += 1
         # state = env.reset(p2=Machete)
         state = env.reset()
         print("reset")

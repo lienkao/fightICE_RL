@@ -124,16 +124,17 @@ def fix_record_episodes():
     with open(f"{VERSION}.txt", 'r+') as r:
         with open(f"{VERSION}_repair.txt", 'w+') as w:
             t = r.read().split('\n')
-            repeat=False
-            exist=set()
             index = 0
+            cnt = 0
             for row in t:
                 if row == '':continue
                 cols = row.split()
-                if cols[1] in exist:
-                    cols[1] = str(index)
-                exist.add(cols[1])
-                index += 1
+                # print(cols)
+                cols[1] = str(index)
+                cnt += 1
+                if cnt >= 3: 
+                    cnt = 0
+                    index += 1
                 w.write(' '.join(cols)+'\n')
 def keep_track_game():
     while True:
@@ -150,8 +151,10 @@ if __name__ == "__main__":
     check_args(args)
     # keep_track_ga
     # me()
+    # fix_record_episodes()
     rewards = get_rewards()
     poly(rewards)
-    # steps = get_steps()
-    # poly(steps)
+    steps = get_steps()
+    poly(steps)
     
+     
