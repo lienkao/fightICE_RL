@@ -71,6 +71,15 @@ def main():
     train_done = False
     start_training = False
     buffer = []
+    
+    try:
+        with open('./DRL/records/{}.txt'.format(VERSION), 'r') as f:
+            for line in f:
+                now = line.split()[1]
+                i_episode = now
+    except:
+        i_episode = 0    
+    
     for i_episode in range(DONE_EPISODES, n_episodes):
     # while not train_done:
         # i_episode += 1
