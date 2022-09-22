@@ -58,8 +58,6 @@ def main():
     n_episodes = 2000
     i_episode = 0
     
-    dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
-    dqn.restore_params()
     # _actions = "AIR_B CROUCH_B STAND_B CROUCH_FB CROUCH_FA STAND_D_DB_BB DASH BACK_STEP".split()
     # _actions = ['FOR_JUMP _B B B', 'FOR_JUMP', 'STAND_D_DF_FC', 'STAND_D_DB_BB', 'STAND_F_D_DFA', '6 6 6', 'B', 'AIR_DB']
     
@@ -76,9 +74,15 @@ def main():
         with open('./DRL/records/{}.txt'.format(VERSION), 'r') as f:
             for line in f:
                 now = line.split()[1]
-                i_episode = now
+                DONE_EPISODES = now+1
     except:
-        i_episode = 0    
+        DONE_EPISODES = 0    
+    
+    learning_rate -= (DONE_EPISODES // 401) * 0.0024
+    
+    
+    dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
+    dqn.restore_params()
     
     for i_episode in range(DONE_EPISODES, n_episodes):
     # while not train_done:
@@ -89,6 +93,12 @@ def main():
         cnt = 0
         steps = 0
         rewards = 0
+        
+        if i_episode % 401 == 0:
+            learning_rate = 0.01 - ((DONE_EPISODES // 401) * 0.0024)
+            dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
+            dqn.restore_params()
+        
         while True:
             # action = random.randint(0, 55)
             action = dqn.choose_action(state)
