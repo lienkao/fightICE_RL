@@ -50,9 +50,9 @@ def main():
     # Hyper parameters
     n_hidden = 256
     batch_size = 128
-    learning_rate = 0.1                 # learning rate
+    learning_rate = 0.01                 # learning rate
     epsilon = 0.2            #  epsilon-greedy
-    discount_factor = 0.5              # reward discount factor
+    discount_factor = 0.75              # reward discount factor
     target_replace_iter = 100 # target network 更新間隔
     memory_capacity = 1024
     n_episodes = 2000
@@ -90,7 +90,7 @@ def main():
             rewards += reward
             print(f"reward: {reward}, rewards: {rewards}")
             steps += 1
-            if np.random.random_sample() <= np.log2(reward*2+10)+0.5:
+            if np.random.random_sample() <= np.log2(abs(reward)*2+10)+0.5:
                 dqn.store_transition(state, action, reward, new_state)
             if dqn.memory_counter > memory_capacity:
                 # print("learn()")
