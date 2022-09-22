@@ -94,7 +94,7 @@ def main():
         steps = 0
         rewards = 0
         
-        if i_episode % 401 == 0:
+        if i_episode and i_episode % 401 == 0:
             learning_rate = 0.01 - ((DONE_EPISODES // 401) * 0.0024)
             dqn = DQN(n_states, n_actions, n_hidden, batch_size, learning_rate, epsilon, discount_factor, target_replace_iter, memory_capacity, VERSION)
             dqn.restore_params()
