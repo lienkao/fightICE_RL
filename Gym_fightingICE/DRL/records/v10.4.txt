@@ -1,0 +1,3 @@
+episodes 0 round 1 finish, rewards: -361.8 steps: 121
+episodes 0 round 2 finish, rewards: -221.60000000000002 steps: 117
+episodes 0 round 3 finish, rewards: -459.9 steps: 123

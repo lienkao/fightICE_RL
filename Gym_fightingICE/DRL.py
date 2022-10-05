@@ -73,7 +73,7 @@ def main():
     try:
         with open('./DRL/records/{}.txt'.format(VERSION), 'r') as f:
             for line in f:
-                now = line.split()[1]
+                now = int(line.split()[1])
                 DONE_EPISODES = now+1
     except:
         DONE_EPISODES = 0    
