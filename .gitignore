@@ -128,7 +128,10 @@ __pypackages__/
 # # Pyre type checker
 # .pyre/
 
+log/
+point/
 replay/
 replay_old/
 
 *_record.pkl
+/Gym_fightingICE/log/point/check_winning_rate.py
